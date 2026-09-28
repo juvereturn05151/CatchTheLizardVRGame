@@ -1,0 +1,676 @@
+{
+  "native_parent_and_no_duplicate_blueprint_gameplay": true,
+  "blueprints_compiled_without_errors_or_warnings": [
+    "/Game/CatchTheLizard/BP_Lizard",
+    "/Game/XRFramework/Blueprints/BP_XRPawn",
+    "/Game/CatchTheLizard/BP_Broom",
+    "/Game/CatchTheLizard/BPI_Rakeable",
+    "/Game/CatchTheLizard/BP_Spray",
+    "/Game/CatchTheLizard/BP_SmokePuff",
+    "/Game/CatchTheLizard/BP_CollectionBottle",
+    "/Game/CatchTheLizard/BP_LizardCollectionManager",
+    "/Game/CatchTheLizard/WBP_CollectionVictory"
+  ],
+  "gameplay_map_saved_and_reloaded": true,
+  "all_prior_class_defaults_and_placed_instance_values_preserved": true,
+  "original_component_templates_meshes_materials_collision_preserved": true,
+  "all_placed_actor_transforms_gameplay_components_and_room_geometry_unchanged": true,
+  "original_asset_referencers_preserved": [
+    "/Game/CatchTheLizard/BP_CollectionBottle",
+    "/Game/CatchTheLizard/BP_LizardCollectionManager",
+    "/Game/XRFramework/Blueprints/BP_XRPawn",
+    "/Game/Maps/Map_CatchTheLizard"
+  ],
+  "runtime_pie_checks": {
+    "broom": [
+      {
+        "check": "floor reference below elevated PlayerStart",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "left handle selected by template grab query",
+        "passed": true,
+        "detail": "<Object '/Game/Maps/UEDPIE_0_Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.BP_Broom_C_0.GrabComponent' (0x000001C70F0E9D80) Class 'BP_GrabComponent_C'>"
+      },
+      {
+        "check": "left TryGrab attaches broom",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "left TryRelease detaches broom",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "right handle selected by template grab query",
+        "passed": true,
+        "detail": "<Object '/Game/Maps/UEDPIE_0_Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.BP_Broom_C_0.GrabComponent' (0x000001C70F0E9D80) Class 'BP_GrabComponent_C'>"
+      },
+      {
+        "check": "right TryGrab attaches broom",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "right TryRelease detaches broom",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "tip is not selected as handle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "pickup sample has zero velocity",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "20 cm / 0.1 s gives 200 cm/s",
+        "passed": true,
+        "detail": "<Struct 'Vector' (0x000001C6DFE068B8) {x: 200.000000, y: 0.000000, z: 0.000000}>"
+      },
+      {
+        "check": "release invalidates sample",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "no valid surface rejects rake",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "rejected rake leaves transform and state",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "ceiling rake accepted",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "relocation below floor-relative height cap",
+        "passed": true,
+        "detail": "<Struct 'Vector' (0x000001C6F57056E0) {x: -100.000000, y: 0.000000, z: 9.000000}>"
+      },
+      {
+        "check": "rake dazes but does not catch",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "daze blocks movement",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "cooldown rejects second rake",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "daze expires into flee",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "normal threat check preserves forced flee",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "149 cm/s rejected",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "150 cm/s accepted through interface",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "continuous contact latched beyond cooldown",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "swept tip catches between-frame pass",
+        "passed": true,
+        "detail": "<Struct 'Vector' (0x000001C6BB417670) {x: -70.000000, y: 0.000000, z: 290.000000}>"
+      },
+      {
+        "check": "held broom alerts at 90 cm with +20 bonus",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "dropped broom ignored by threat check",
+        "passed": true,
+        "detail": ""
+      }
+    ],
+    "spray_stun": [
+      {
+        "check": "placed stun halo has mesh and material",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "left template selects spray handle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "left grip attaches",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "left release detaches",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "right template selects spray handle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "right grip attaches",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "right release detaches",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "holding trigger creates smoke",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "visible sphere matches radius",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "trigger release stops new smoke",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "drop blocks trigger emission and leaves old smoke",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "inside clear smoke accepted",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "outside visible radius rejected",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "elapsed exposure accumulates",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "frame subdivision gives same exposure",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "overlapping smoke counts once",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "outside smoke decays with elapsed time",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "decay clamps at zero",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "stun halo visible",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "threshold stuns and resets exposure",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "stun supersedes broom daze and fleeing",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "stun preserves surface and location",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "additional smoke cannot extend stun",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "stun blocks movement gate",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "stun blocks broom rake",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "sense cannot start flee during stun",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "old feedback callback preserves stun appearance",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "expiry clears stun and restores appearance",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "expiry hides stun halo",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "floor blocks exposure within radius",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "smoke travel stops before floor",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left hand catches stunned lizard",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left caught state blocks stun expiry movement",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left catch feedback can restore normally",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left catch hides stun halo",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right hand catches stunned lizard",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right caught state blocks stun expiry movement",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right catch feedback can restore normally",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right catch hides stun halo",
+        "passed": true,
+        "detail": ""
+      }
+    ],
+    "bottle_catch": [
+      {
+        "check": "level has one bottle and one manager",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "initial count reflects actual lizards",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "existing grip query finds bottle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "existing grab attaches bottle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left idle mouth overlap ignored",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left tool hand cannot catch",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right catches with free hand",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right caught hand cannot pick another tool",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left wrong-hand release ignored",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right release clears caught and detaches",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right dropped transfer cannot deposit",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right dropped lizard lands on floor",
+        "passed": true,
+        "detail": "<Struct 'Vector' (0x000001C6F5732540) {x: 0.000000, y: 0.000000, z: 9.000000}>"
+      },
+      {
+        "check": "existing grip query finds bottle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "existing grab attaches bottle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right idle mouth overlap ignored",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right tool hand cannot catch",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left catches with free hand",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left caught hand cannot pick another tool",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right wrong-hand release ignored",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left release clears caught and detaches",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left dropped transfer cannot deposit",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left dropped lizard lands on floor",
+        "passed": true,
+        "detail": "<Struct 'Vector' (0x000001C6F5732900) {x: 0.000000, y: 0.000000, z: 9.000000}>"
+      },
+      {
+        "check": "spray hand cannot pick bottle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "released tool frees hand for bottle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "census counts two distinct actors once",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "existing grip query finds bottle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "existing grab attaches bottle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right catches with free hand",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "opposite-hand caught overlap deposits",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "stored lizard detached hidden and noncolliding",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "first of two never wins early",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "repeat deposit does not count twice",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "existing grip query finds bottle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "existing grab attaches bottle",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "left catches stunned second lizard",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "reverse-hand final overlap deposits",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "final deposit wins at exact count",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "victory widget appears",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "widget shows actual count",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "victory blocks gameplay pawn and grabs",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "victory stops spray and bottle activity",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "victory repeated call preserves single widget",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "held trigger cannot immediately activate victory UI",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "released triggers arm victory UI",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left victory pointer press remains available",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Left victory pointer release remains available",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right victory pointer press remains available",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "check": "Right victory pointer release remains available",
+        "passed": true,
+        "detail": ""
+      }
+    ],
+    "spray_live_input_timing": {
+      "stun_prevents_actual_tick_movement": true,
+      "stun_expires_automatically": true,
+      "lizard_resumes_movement": true,
+      "other_hand_trigger_does_not_spray": true,
+      "right_trigger_binding_emits": true,
+      "release_input_stops_emission": true,
+      "old_smoke_expires_naturally": true,
+      "left_trigger_binding_emits": true,
+      "drop_leaves_existing_smoke": true,
+      "drop_stops_despite_held_trigger": true
+    },
+    "native_catch_release_input": {
+      "left_pressed_action_native_catch": true,
+      "left_released_action_native_drop": true,
+      "left_drop_lands_during_live_tick": true,
+      "right_pressed_action_native_catch": true,
+      "right_released_action_native_drop": true,
+      "right_drop_lands_during_live_tick": true
+    },
+    "native_surface_motion": {
+      "floor_moves_at_configured_speed": true,
+      "floor_keeps_surface_standoff": true,
+      "wall_moves_at_configured_speed": true,
+      "wall_keeps_surface_standoff": true,
+      "ceiling_moves_at_configured_speed": true,
+      "ceiling_keeps_surface_standoff": true,
+      "flee_moves_at_configured_speed": true,
+      "flee_keeps_surface_standoff": true,
+      "rake_candidate_cannot_cross_solid_wall": true
+    },
+    "smoke_motion_obstruction": {
+      "forward_speed_25cm_in_point1seconds": true,
+      "travel_clamped_to_designer_range": true,
+      "opacity_fades_with_age": true,
+      "solid_wall_trace_exists": true,
+      "vertical_wall_blocks_smoke_exposure": true
+    },
+    "broom_live_daze_timing": {
+      "initial_pulse_scale": "<Struct 'Vector' (0x000001C7105965B0) {x: 0.240000, y: 0.240000, z: 0.240000}>",
+      "daze_still": true,
+      "feedback_restored": true,
+      "automatic_daze_expiry": true,
+      "flee_moves": true,
+      "never_caught": true
+    }
+  },
+  "total_passed_runtime_checks": 148,
+  "initial_editor_module_build_succeeded": true,
+  "native_editor_target_build_succeeded": true,
+  "toolchain": {
+    "engine": "5.8.2",
+    "target": "CTLProjectEditor Win64 Development",
+    "msvc": "14.44.35228",
+    "windows_sdk": "10.0.22621.0",
+    "missing_windows_requirements": []
+  },
+  "changed_preexisting_files": [
+    "Content\\CatchTheLizard\\BP_CollectionBottle.uasset",
+    "Content\\CatchTheLizard\\BP_Lizard.uasset",
+    "Content\\CatchTheLizard\\BP_LizardCollectionManager.uasset",
+    "Content\\Maps\\Map_CatchTheLizard.umap",
+    "Content\\XRFramework\\Blueprints\\BP_XRPawn.uasset",
+    "CTLProject.uproject"
+  ],
+  "checkpoint": "Saved/MigrationCheckpoint/20260928-pre-cpp",
+  "quest2_tested": false,
+  "physical_controller_tested": false,
+  "android_build_performed": false,
+  "cold_editor_restart_native_actor_and_hand_references_valid": true,
+  "final_editor_build_succeeded": true,
+  "android_sdk_verification": {
+    "status": "unverified",
+    "blocker": "Turnkey VerifySdk raised System.ArgumentNullException in GetPlatformsAndDevicesFromCommandLineOrUser; no SDK validation or Android build completed.",
+    "engine_expected_ndk": "r27c (27.2.12479018)",
+    "engine_expected_platform": "android-36",
+    "engine_expected_build_tools": "36.0.0"
+  },
+  "victory_restart_button_execution_verified_in_this_migration": false,
+  "verified_utc": "2026-09-28T11:27:34.028764+00:00"
+}

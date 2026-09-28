@@ -1,0 +1,165 @@
+{
+  "blueprint_statuses": {
+    "/Game/CatchTheLizard/BP_Lizard": "<BlueprintStatus.BS_UP_TO_DATE: 3>",
+    "/Game/CatchTheLizard/BP_Spray": "<BlueprintStatus.BS_UP_TO_DATE: 3>",
+    "/Game/CatchTheLizard/BP_SmokePuff": "<BlueprintStatus.BS_UP_TO_DATE: 3>",
+    "/Game/CatchTheLizard/BP_Broom": "<BlueprintStatus.BS_UP_TO_DATE: 3>",
+    "/Game/CatchTheLizard/WBP_LizardSprayStatus": "<BlueprintStatus.BS_UP_TO_DATE: 3>",
+    "/Game/CatchTheLizard/BPI_Rakeable": "<BlueprintStatus.BS_UP_TO_DATE: 3>",
+    "/Game/CatchTheLizard/BP_CollectionBottle": "<BlueprintStatus.BS_UP_TO_DATE: 3>",
+    "/Game/CatchTheLizard/BP_LizardCollectionManager": "<BlueprintStatus.BS_UP_TO_DATE: 3>",
+    "/Game/CatchTheLizard/WBP_CollectionVictory": "<BlueprintStatus.BS_UP_TO_DATE: 3>",
+    "/Game/CatchTheLizard/BP_LizardVRPawn": "<BlueprintStatus.BS_UP_TO_DATE: 3>",
+    "/Game/XRFramework/Blueprints/BP_XRPawn": "<BlueprintStatus.BS_UP_TO_DATE: 3>",
+    "/Game/XRFramework/Blueprints/BP_GrabComponent": "<BlueprintStatus.BS_UP_TO_DATE: 3>"
+  },
+  "original_lizard_components_preserved": {
+    "LizardBody_GEN_VARIABLE": true,
+    "CatchSphere_GEN_VARIABLE": true,
+    "FacingIndicator_GEN_VARIABLE": true,
+    "SmokeStunHalo_GEN_VARIABLE": true,
+    "DefaultSceneRoot_GEN_VARIABLE": true
+  },
+  "world_widget_blueprint_reference_valid": true,
+  "native_blueprint_graphs": {
+    "BP_Lizard": {
+      "nodes": {
+        "UserConstructionScript": 1,
+        "EventGraph": 0,
+        "Raked": 3
+      },
+      "declared_gameplay_variables": []
+    },
+    "BP_Spray": {
+      "nodes": {
+        "UserConstructionScript": 1,
+        "EventGraph": 0
+      },
+      "declared_gameplay_variables": []
+    },
+    "BP_SmokePuff": {
+      "nodes": {
+        "UserConstructionScript": 1,
+        "EventGraph": 0
+      },
+      "declared_gameplay_variables": []
+    },
+    "BP_Broom": {
+      "nodes": {
+        "UserConstructionScript": 1,
+        "EventGraph": 0
+      },
+      "declared_gameplay_variables": []
+    }
+  },
+  "saved_lizard_settings": {
+    "SmokeExposurePerHitPercent": "25.0",
+    "SmokeExposureDecayPercentPerSecond": "50.0",
+    "SmokeExposureDecayDelaySeconds": "0.75",
+    "SmokeStunDurationSeconds": "3.0",
+    "SprayWidgetWorldOffset": "<Struct 'Vector' (0x000001F4E79F4AE0) {x: 0.000000, y: 0.000000, z: 32.000000}>",
+    "SmokeFallCollisionRadiusCm": "8.0",
+    "SmokeFallGravityScale": "1.0",
+    "bDebugSprayState": "False"
+  },
+  "map_saved_and_reloaded": true,
+  "placed_actor_transforms_preserved": {
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_1": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_2": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_3": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_4": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_5": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_6": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_7": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_8": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_9": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_10": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_11": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_12": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.Brush_13": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.PlayerStart_0": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.PointLight_0": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.PointLight_1": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.NavMeshBoundsVolume_0": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.RecastNavMesh-Default": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.BP_Broom_C_0": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.BP_Spray_C_0": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.BP_Lizard_C_0": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.BP_CollectionBottle_C_0": true,
+    "/Game/Maps/Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.BP_LizardCollectionManager_C_0": true
+  },
+  "saved_defaults_and_placed_stun_decay_preserved": true,
+  "missing_game_dependencies": {
+    "/Game/CatchTheLizard/BP_Lizard": [],
+    "/Game/CatchTheLizard/BP_Spray": [],
+    "/Game/CatchTheLizard/BP_SmokePuff": [],
+    "/Game/CatchTheLizard/BP_Broom": [],
+    "/Game/CatchTheLizard/WBP_LizardSprayStatus": [],
+    "/Game/CatchTheLizard/BPI_Rakeable": [],
+    "/Game/CatchTheLizard/BP_CollectionBottle": [],
+    "/Game/CatchTheLizard/BP_LizardCollectionManager": [],
+    "/Game/CatchTheLizard/WBP_CollectionVictory": [],
+    "/Game/CatchTheLizard/BP_LizardVRPawn": [],
+    "/Game/XRFramework/Blueprints/BP_XRPawn": [],
+    "/Game/XRFramework/Blueprints/BP_GrabComponent": [],
+    "/Game/Maps/Map_CatchTheLizard": []
+  },
+  "short_desktop_pie_checks": {
+    "swept_bubble_hits_actual_lizard": true,
+    "same_bubble_components_and_repeated_calls_count_once": true,
+    "world_widget_updates_immediately": true,
+    "bubble_overlap_through_existing_wall_is_rejected": true,
+    "four_distinct_bubbles_trigger_falling_stun": true,
+    "fall_has_no_stun_deadline_and_label": true,
+    "further_hits_cannot_restart_falling_stun": true,
+    "gravity_fall_moves_down_without_wall_reattachment": true,
+    "landing_starts_full_grounded_stun": true,
+    "grounded_widget_displays_remaining_time": true,
+    "catch_during_stun_cancels_recovery_and_ui": true
+  },
+  "short_desktop_recovery_checks": {
+    "already_grounded_stun_starts_immediately": true,
+    "old_feedback_and_broom_cannot_override_stun": true,
+    "repeated_stun_activation_does_not_extend_deadline": true,
+    "actual_countdown_expires_resets_ui_and_resumes_on_ground": true,
+    "existing_right_hand_catch_during_fall_cancels_recovery": true
+  },
+  "editor_build_succeeded": true,
+  "engine": "5.8.2",
+  "build_target": "CTLProjectEditor Win64 Development",
+  "headset_testing_performed": false,
+  "android_packaging_performed": false,
+  "extensive_gameplay_tests_performed": false,
+  "checkpoint": "Saved/MigrationCheckpoint/20260928-pre-spray-hit-fix",
+  "map_check": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "changed_preexisting_files": [
+    "Content\\CatchTheLizard\\BP_Lizard.uasset",
+    "Content\\Maps\\Map_CatchTheLizard.umap",
+    "Docs\\Lizard-Cpp-Migration.md",
+    "Docs\\Tools-Cpp-Migration.md",
+    "Source\\CTLProject\\CTLProject.Build.cs",
+    "Source\\CTLProject\\LizardGameplayActor.cpp",
+    "Source\\CTLProject\\LizardGameplayActor.h",
+    "Source\\CTLProject\\SmokePuffGameplayActor.cpp",
+    "Source\\CTLProject\\SmokePuffGameplayActor.h",
+    "Source\\CTLProject\\SprayGameplayActor.cpp"
+  ],
+  "new_assets_and_native_files": [
+    "Content/CatchTheLizard/WBP_LizardSprayStatus.uasset",
+    "Source/CTLProject/LizardStatusWidget.h",
+    "Source/CTLProject/LizardStatusWidget.cpp"
+  ],
+  "unrelated_content_and_project_configuration_unchanged_by_hash": true,
+  "pie_check_method": "Short scripted native calls in the gameplay PIE world, real swept bubbles emitted through the held tool, simulated existing hand overlaps, and an actual 3-second world-time stun expiry. No physical controller input was tested.",
+  "manual_checks_remaining": [
+    "Quest 2 trigger aiming and hit feel",
+    "Stereo widget readability and headset facing",
+    "Exposure decay timing and tuning",
+    "Ceiling/edge/sloped-ground fall and recovery",
+    "Physical left/right catching while falling or grounded",
+    "Broom and bottle/teleport interaction regression"
+  ]
+}

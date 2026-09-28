@@ -1,0 +1,90 @@
+{
+  "blueprints_compiled_without_errors_or_warnings": [
+    "/Game/CatchTheLizard/BP_Broom",
+    "/Game/CatchTheLizard/BP_Spray",
+    "/Game/CatchTheLizard/BP_SmokePuff",
+    "/Game/CatchTheLizard/BP_Lizard",
+    "/Game/CatchTheLizard/BPI_Rakeable",
+    "/Game/CatchTheLizard/BP_CollectionBottle",
+    "/Game/CatchTheLizard/BP_LizardCollectionManager",
+    "/Game/CatchTheLizard/WBP_CollectionVictory",
+    "/Game/XRFramework/Blueprints/BP_XRPawn",
+    "/Game/XRFramework/Blueprints/BP_GrabComponent"
+  ],
+  "BP_Broom": {
+    "native_parent": "BroomGameplayActor",
+    "no_duplicate_blueprint_gameplay": true,
+    "original_defaults_instances_and_components_preserved": true,
+    "referencers": [
+      "/Game/CatchTheLizard/BP_LizardCollectionManager",
+      "/Game/Maps/Map_CatchTheLizard"
+    ]
+  },
+  "BP_Spray": {
+    "native_parent": "SprayGameplayActor",
+    "no_duplicate_blueprint_gameplay": true,
+    "original_defaults_instances_and_components_preserved": true,
+    "referencers": [
+      "/Game/CatchTheLizard/BP_LizardCollectionManager",
+      "/Game/Maps/Map_CatchTheLizard"
+    ]
+  },
+  "BP_SmokePuff": {
+    "native_parent": "SmokePuffGameplayActor",
+    "no_duplicate_blueprint_gameplay": true,
+    "original_defaults_instances_and_components_preserved": true,
+    "referencers": [
+      "/Game/CatchTheLizard/BP_Spray"
+    ]
+  },
+  "all_placed_actor_transforms_components_room_geometry_preserved": true,
+  "gameplay_map_saved_and_reloaded": true,
+  "editor_build_succeeded": true,
+  "toolchain": {
+    "engine": "5.8.2",
+    "target": "CTLProjectEditor Win64 Development",
+    "msvc": "14.44.35228",
+    "windows_sdk": "10.0.22621.0"
+  },
+  "map_check": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "checkpoint": "Saved/MigrationCheckpoint/20260928-pre-tools-cpp",
+  "changed_preexisting_files": [
+    "Content\\CatchTheLizard\\BP_Broom.uasset",
+    "Content\\CatchTheLizard\\BP_SmokePuff.uasset",
+    "Content\\CatchTheLizard\\BP_Spray.uasset",
+    "Content\\CatchTheLizard\\WBP_CollectionVictory.uasset",
+    "Content\\Maps\\Map_CatchTheLizard.umap"
+  ],
+  "headset_testing_performed": false,
+  "android_packaging_performed": false,
+  "extensive_gameplay_tests_performed": false,
+  "short_desktop_pie_checks": {
+    "real_placed_broom_is_native": true,
+    "real_placed_spray_is_native": true,
+    "pickup_has_zero_tip_velocity": true,
+    "held_broom_threat_query": true,
+    "pawn_move_resets_tip_velocity": true,
+    "drop_dispatcher_invalidates_sample": true,
+    "native_puff_spawned": true,
+    "puff_initialization_preserves_tuning": true,
+    "other_hand_trigger_does_not_emit": true,
+    "right_trigger_binding_emits": true,
+    "trigger_release_stops_emission": true,
+    "left_trigger_binding_emits": true,
+    "drop_stops_emission_immediately": true,
+    "drop_keeps_existing_puffs": true,
+    "native_puff_exposure_query": true,
+    "overlapping_native_puffs_accumulate_once": true,
+    "native_smoke_query_blocked_by_existing_wall": true
+  },
+  "short_desktop_pie_passed_checks": 17,
+  "physical_controller_input_tested": false,
+  "unrelated_preexisting_startup_diagnostics": [
+    "GameFeatureData missing Asset Manager scan rule",
+    "Unavailable XR_BD_controller_interaction and XR_EXT_eye_gaze_interaction extensions in the desktop environment"
+  ],
+  "preexisting_victory_widget_warning_fixed": "Connected OnClicked execution through its existing GetActorOfClass lookup before the existing manager cast/RestartRound call. No Restart controller interaction was tested."
+}

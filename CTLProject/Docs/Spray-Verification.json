@@ -1,0 +1,420 @@
+{
+  "BP_Spray": {
+    "compiled_without_errors_or_warnings": true,
+    "designer_defaults": {
+      "SprayRangeCm": 180.0,
+      "SmokeRadiusCm": 22.0,
+      "SmokeLifetimeSeconds": 1.2,
+      "EmissionIntervalSeconds": 0.15,
+      "TriggerThreshold": 0.2
+    },
+    "no_duplicate_variables_or_graphs": true,
+    "components": [
+      "BottleMesh_GEN_VARIABLE",
+      "Nozzle_GEN_VARIABLE",
+      "NozzleMesh_GEN_VARIABLE",
+      "GrabComponent_GEN_VARIABLE",
+      "GrabCollision_GEN_VARIABLE"
+    ]
+  },
+  "BP_SmokePuff": {
+    "compiled_without_errors_or_warnings": true,
+    "designer_defaults": {},
+    "no_duplicate_variables_or_graphs": true,
+    "components": [
+      "DefaultSceneRoot_GEN_VARIABLE",
+      "SmokeMesh_GEN_VARIABLE"
+    ]
+  },
+  "BP_Lizard": {
+    "compiled_without_errors_or_warnings": true,
+    "designer_defaults": {
+      "SmokeExposureThresholdSeconds": 1.0,
+      "SmokeExposureDecayPerSecond": 0.5,
+      "SmokeStunDurationSeconds": 3.0
+    },
+    "no_duplicate_variables_or_graphs": true,
+    "components": [
+      "LizardBody_GEN_VARIABLE",
+      "CatchSphere_GEN_VARIABLE",
+      "FacingIndicator_GEN_VARIABLE",
+      "SmokeStunHalo_GEN_VARIABLE",
+      "DefaultSceneRoot_GEN_VARIABLE"
+    ]
+  },
+  "both_hand_catch_graphs_unchanged": true,
+  "BP_Broom": {
+    "compiled_without_errors_or_warnings": true,
+    "designer_defaults": {
+      "RakeVelocityThreshold": 150.0
+    },
+    "no_duplicate_variables_or_graphs": true
+  },
+  "BPI_Rakeable": {
+    "compiled_without_errors_or_warnings": true,
+    "designer_defaults": {},
+    "no_duplicate_variables_or_graphs": true
+  },
+  "saved_level_reloaded_and_halo_assignments_valid": true,
+  "placed_spray": {
+    "label": "Spray_StunTool",
+    "location_cm": [
+      55.0,
+      -55.0,
+      110.0
+    ],
+    "map": "/Game/Maps/Map_CatchTheLizard"
+  },
+  "spray_runtime_checks": [
+    {
+      "check": "placed stun halo has mesh and material",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "left template selects spray handle",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "left grip attaches",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "left release detaches",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "right template selects spray handle",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "right grip attaches",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "right release detaches",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "holding trigger creates smoke",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "visible sphere matches radius",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "trigger release stops new smoke",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "drop blocks trigger emission and leaves old smoke",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "inside clear smoke accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "outside visible radius rejected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "elapsed exposure accumulates",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "frame subdivision gives same exposure",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "overlapping smoke counts once",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "outside smoke decays with elapsed time",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "decay clamps at zero",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "stun halo visible",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "threshold stuns and resets exposure",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "stun supersedes broom daze and fleeing",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "stun preserves surface and location",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "additional smoke cannot extend stun",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "stun blocks movement gate",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "stun blocks broom rake",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "sense cannot start flee during stun",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "old feedback callback preserves stun appearance",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "expiry clears stun and restores appearance",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "expiry hides stun halo",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "floor blocks exposure within radius",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "smoke travel stops before floor",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Left hand catches stunned lizard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Left caught state blocks stun expiry movement",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Left catch feedback can restore normally",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Left catch hides stun halo",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Right hand catches stunned lizard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Right caught state blocks stun expiry movement",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Right catch feedback can restore normally",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Right catch hides stun halo",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "injected_input_and_timing_checks": {
+    "stun_prevents_actual_tick_movement": true,
+    "stun_expires_automatically": true,
+    "lizard_resumes_movement": true,
+    "other_hand_trigger_does_not_spray": true,
+    "right_trigger_binding_emits": true,
+    "release_input_stops_emission": true,
+    "old_smoke_expires_naturally": true,
+    "left_trigger_binding_emits": true,
+    "drop_leaves_existing_smoke": true,
+    "drop_stops_despite_held_trigger": true
+  },
+  "smoke_motion_and_wall_checks": {
+    "forward_speed_25cm_in_point1seconds": true,
+    "travel_clamped_to_designer_range": true,
+    "opacity_fades_with_age": true,
+    "solid_wall_trace_exists": true,
+    "vertical_wall_blocks_smoke_exposure": true
+  },
+  "broom_regression_checks": [
+    {
+      "check": "floor reference below elevated PlayerStart",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "left handle selected by template grab query",
+      "passed": true,
+      "detail": "<Object '/Game/Maps/UEDPIE_0_Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.BP_Broom_C_0.GrabComponent' (0x000001E479431C00) Class 'BP_GrabComponent_C'>"
+    },
+    {
+      "check": "left TryGrab attaches broom",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "left TryRelease detaches broom",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "right handle selected by template grab query",
+      "passed": true,
+      "detail": "<Object '/Game/Maps/UEDPIE_0_Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.BP_Broom_C_0.GrabComponent' (0x000001E479431C00) Class 'BP_GrabComponent_C'>"
+    },
+    {
+      "check": "right TryGrab attaches broom",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "right TryRelease detaches broom",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "tip is not selected as handle",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "pickup sample has zero velocity",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "20 cm / 0.1 s gives 200 cm/s",
+      "passed": true,
+      "detail": "<Struct 'Vector' (0x000001E4A6F07CB8) {x: 200.000000, y: 0.000000, z: 0.000000}>"
+    },
+    {
+      "check": "release invalidates sample",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "no valid surface rejects rake",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "rejected rake leaves transform and state",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "ceiling rake accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "relocation below floor-relative height cap",
+      "passed": true,
+      "detail": "<Struct 'Vector' (0x000001E43888C3D0) {x: -100.000000, y: 0.000000, z: 9.000000}>"
+    },
+    {
+      "check": "rake dazes but does not catch",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "daze blocks movement",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "cooldown rejects second rake",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "daze expires into flee",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "normal threat check preserves forced flee",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "149 cm/s rejected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "150 cm/s accepted through interface",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "continuous contact latched beyond cooldown",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "swept tip catches between-frame pass",
+      "passed": true,
+      "detail": "<Struct 'Vector' (0x000001E43888C3D0) {x: -70.000000, y: 0.000000, z: 290.000000}>"
+    },
+    {
+      "check": "held broom alerts at 90 cm with +20 bonus",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "dropped broom ignored by threat check",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "desktop_visual_verified": true,
+  "physical_controller_tested": false,
+  "quest2_tested": false,
+  "android_build_performed": false
+}

@@ -1,0 +1,205 @@
+{
+  "BP_Broom": {
+    "compiled_without_errors_or_warnings": true,
+    "tunables": {
+      "RakeVelocityThreshold": 150.0
+    },
+    "graphs": [
+      "UserConstructionScript",
+      "GetHeldThreat",
+      "ProcessRakeContact",
+      "UpdateRake",
+      "EventGraph"
+    ],
+    "components": [
+      "GrabCollision_GEN_VARIABLE",
+      "GrabComponent_GEN_VARIABLE",
+      "RakeHead_GEN_VARIABLE",
+      "BroomMesh_GEN_VARIABLE"
+    ]
+  },
+  "BP_Lizard": {
+    "compiled_without_errors_or_warnings": true,
+    "tunables": {
+      "RakeCooldown": 0.5,
+      "MaxRakeHeight": 140.0,
+      "DazedDuration": 0.4,
+      "BroomDetectionRadiusBonus": 20.0,
+      "ForcedFleeDuration": 1.0
+    },
+    "graphs": [
+      "UserConstructionScript",
+      "SenseThreat",
+      "TryCatchLeft",
+      "TryCatchRight",
+      "RestoreCatchFeedback",
+      "SetFleeDirectionFromThreat",
+      "EvaluateRakeCandidate",
+      "FindReachableRakeSurface",
+      "UpdateRakeDaze",
+      "ConsiderThreatPosition",
+      "ResolveRakeFloor",
+      "EventGraph",
+      "Raked"
+    ]
+  },
+  "hand_catch_graphs_unchanged": true,
+  "BPI_Rakeable": {
+    "compiled_without_errors_or_warnings": true,
+    "tunables": {},
+    "graphs": [
+      "Raked"
+    ]
+  },
+  "placed_broom": {
+    "label": "Broom_HerdingTool",
+    "location_cm": [
+      75,
+      75,
+      120
+    ],
+    "map": "/Game/Maps/Map_CatchTheLizard"
+  },
+  "runtime_checks": [
+    {
+      "check": "floor reference below elevated PlayerStart",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "left handle selected by template grab query",
+      "passed": true,
+      "detail": "<Object '/Game/Maps/UEDPIE_0_Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.BP_Broom_C_0.GrabComponent' (0x000001BD44FFB980) Class 'BP_GrabComponent_C'>"
+    },
+    {
+      "check": "left TryGrab attaches broom",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "left TryRelease detaches broom",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "right handle selected by template grab query",
+      "passed": true,
+      "detail": "<Object '/Game/Maps/UEDPIE_0_Map_CatchTheLizard.Map_CatchTheLizard:PersistentLevel.BP_Broom_C_0.GrabComponent' (0x000001BD44FFB980) Class 'BP_GrabComponent_C'>"
+    },
+    {
+      "check": "right TryGrab attaches broom",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "right TryRelease detaches broom",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "tip is not selected as handle",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "pickup sample has zero velocity",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "20 cm / 0.1 s gives 200 cm/s",
+      "passed": true,
+      "detail": "<Struct 'Vector' (0x000001BE88B4DBB8) {x: 200.000000, y: 0.000000, z: 0.000000}>"
+    },
+    {
+      "check": "release invalidates sample",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "no valid surface rejects rake",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "rejected rake leaves transform and state",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "ceiling rake accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "relocation below floor-relative height cap",
+      "passed": true,
+      "detail": "<Struct 'Vector' (0x000001BE66799690) {x: -100.000000, y: 0.000000, z: 9.000000}>"
+    },
+    {
+      "check": "rake dazes but does not catch",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "daze blocks movement",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "cooldown rejects second rake",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "daze expires into flee",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "normal threat check preserves forced flee",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "149 cm/s rejected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "150 cm/s accepted through interface",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "continuous contact latched beyond cooldown",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "swept tip catches between-frame pass",
+      "passed": true,
+      "detail": "<Struct 'Vector' (0x000001BE66799AF0) {x: -70.000000, y: 0.000000, z: 290.000000}>"
+    },
+    {
+      "check": "held broom alerts at 90 cm with +20 bonus",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "dropped broom ignored by threat check",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "real_time_checks": {
+    "initial_pulse_scale": "<Struct 'Vector' (0x000001BE36F6ABB0) {x: 0.240000, y: 0.240000, z: 0.240000}>",
+    "daze_still": true,
+    "feedback_restored": true,
+    "automatic_daze_expiry": true,
+    "flee_moves": true,
+    "never_caught": true
+  },
+  "blocked_path_rejected": true,
+  "quest2_tested": false
+}
