@@ -8,6 +8,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/SphereComponent.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/Pawn.h"
@@ -99,6 +100,7 @@ void ALizardGameplayActor::BindCatchInput()
 
 void ALizardGameplayActor::StartThreatTimer()
 {
+    if (bTrainingDoll) return;
     GetWorldTimerManager().SetTimer(ThreatTimer, this, &ALizardGameplayActor::SenseThreat, FMath::Max(.01f, FleeReevaluateInterval), true);
 }
 
@@ -113,6 +115,12 @@ void ALizardGameplayActor::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     if (Caught || bStored) return;
+    if (bTrainingDoll)
+    {
+        bool CanMove = false;
+        if (bDropped) UpdateDroppedMotion(DeltaSeconds, CanMove);
+        return;
+    }
     bool CanMove = false;
     // Incapacitation has priority over ordinary drop motion, broom daze and surface attachment.
     UpdateSmokeStatus(DeltaSeconds, CanMove);
@@ -174,6 +182,7 @@ void ALizardGameplayActor::SetFleeDirectionFromThreat(FVector Origin)
 
 void ALizardGameplayActor::SenseThreat()
 {
+    if (bTrainingDoll) return;
     if (Caught || bStored || bDropped || bSmokeStunned || bWasRaked) return;
     ClosestDistance = 100000.f;
     if (IsValid(LeftHand)) ConsiderThreatPosition(LeftHand->GetComponentLocation(), 0.f);
@@ -218,6 +227,7 @@ bool ALizardGameplayActor::GameplayInputLocked() const
 void ALizardGameplayActor::CanCatchWithHand(USceneComponent* Hand, bool& Allowed)
 {
     Allowed = false;
+    if (bTrainingDoll && !bTrainingPickupEnabled) return;
     if (Caught || bStored || !IsValid(Hand) || GameplayInputLocked()) return;
     APawn* Pawn = UGameplayStatics::GetPlayerPawn(this, 0);
     FCall Occupied(Pawn, TEXT("IsToolHandOccupied"));
@@ -249,6 +259,7 @@ void ALizardGameplayActor::TryCatch(USceneComponent* Hand, UPrimitiveComponent* 
     GetWorldTimerManager().ClearTimer(ThreatTimer);
     ApplyFeedback(CatchFeedbackColor, CatchAndDazeBodyScale, false);
     StartFeedbackPulse();
+    OnCaughtByHand.Broadcast(this);
 }
 
 void ALizardGameplayActor::TryCatchLeft() { TryCatch(LeftHand, HandOverlapLeft); }
@@ -311,8 +322,17 @@ void ALizardGameplayActor::TryStoreInBottle(AActor* Bottle, bool& Accepted)
     USceneComponent* BottleHand = Cast<USceneComponent>(Object(Grab, TEXT("MotionControllerRef")));
     USceneComponent* CatchHand = GetRootComponent()->GetAttachParent();
     UPrimitiveComponent* Mouth = Cast<UPrimitiveComponent>(Object(Bottle, TEXT("DepositVolume")));
-    if (!Bool(Grab, TEXT("bIsHeld")) || !IsValid(BottleHand) || (CatchHand != LeftHand && CatchHand != RightHand)
-        || !IsValid(CatchHand) || CatchHand == BottleHand || !IsValid(Mouth) || !Mouth->IsOverlappingComponent(CatchVolume.Get())) return;
+    if ((CatchHand != LeftHand && CatchHand != RightHand) || !IsValid(CatchHand)
+        || !IsValid(Mouth) || !Mouth->IsOverlappingComponent(CatchVolume.Get())) return;
+    if (bTrainingDoll)
+    {
+        // Only the assigned stationary training receptacle is allowed. Require the doll center
+        // inside its mouth, not merely touching the edge with the catch sphere.
+        const USphereComponent* Sphere = Cast<USphereComponent>(Mouth);
+        if (Bottle != TrainingContainer || !Sphere || FVector::DistSquared(CatchVolume->GetComponentLocation(), Sphere->GetComponentLocation())
+            > FMath::Square(Sphere->GetScaledSphereRadius() * .7f)) return;
+    }
+    else if (!Bool(Grab, TEXT("bIsHeld")) || !IsValid(BottleHand) || CatchHand == BottleHand) return;
     bStored = true; // Set terminal state before any detach, overlap, or timer callbacks can run.
     CancelSmokeState();
     bDropped = bSmokeStunned = bWasRaked = Fleeing = false;
@@ -327,6 +347,17 @@ void ALizardGameplayActor::TryStoreInBottle(AActor* Bottle, bool& Accepted)
     if (StunHalo.IsValid()) StunHalo->SetVisibility(false);
     // Preserve Caught=true for existing collection/catch guards; bStored prevents every recovery path.
     Accepted = true;
+    OnStoredInContainer.Broadcast(this, Bottle);
+}
+
+void ALizardGameplayActor::ResetTrainingDoll(const FTransform& TableTransform)
+{
+    if (!bTrainingDoll || Caught || bStored) return;
+    bDropped = bWasRaked = Fleeing = false;
+    DropSpeedCmPerSecond = 0.f;
+    GetWorldTimerManager().ClearTimer(FeedbackTimer);
+    SetActorTransform(TableTransform, false, nullptr, ETeleportType::TeleportPhysics);
+    RestoreCatchFeedback();
 }
 
 float ALizardGameplayActor::ResolveRakeFloor()
@@ -388,6 +419,7 @@ void ALizardGameplayActor::FindReachableRakeSurface(bool& Found)
 void ALizardGameplayActor::ReceiveRake(FVector RakeOrigin, bool& Accepted)
 {
     Accepted = false;
+    if (bTrainingDoll) return;
     if (Caught || bStored || bDropped || bSmokeStunned || Now() < RakeReadyTime) return;
     bool Found = false;
     FindReachableRakeSurface(Found);
@@ -423,6 +455,7 @@ void ALizardGameplayActor::UpdateRakeDaze(bool& CanMove)
 
 void ALizardGameplayActor::ReceiveSprayHit(ASmokePuffGameplayActor* Bubble, bool& Accepted)
 {
+    if (bTrainingDoll) { Accepted = false; return; }
     Accepted = false;
     if (!IsValid(Bubble)) return;
     for (auto It = ReceivedSprayBubbles.CreateIterator(); It; ++It)

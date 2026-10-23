@@ -10,6 +10,9 @@ class USceneComponent;
 class UStaticMeshComponent;
 class UWidgetComponent;
 class ASmokePuffGameplayActor;
+class ALizardGameplayActor;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnLizardStored, ALizardGameplayActor*, Lizard, AActor*, Container);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLizardCaught, ALizardGameplayActor*, Lizard);
 
 /** Native behavior for the existing BP_Lizard. Its Blueprint owns the unchanged visual/collision components. */
 UCLASS(Blueprintable)
@@ -20,6 +23,12 @@ class CTLPROJECT_API ALizardGameplayActor : public AActor
 public:
     ALizardGameplayActor();
     virtual void Tick(float DeltaSeconds) override;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Training") bool bTrainingDoll = false;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Lizard|Training") bool bTrainingPickupEnabled = true;
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Lizard|Training") TObjectPtr<AActor> TrainingContainer;
+    UPROPERTY(BlueprintAssignable, Category="Lizard|Collection") FOnLizardStored OnStoredInContainer;
+    UPROPERTY(BlueprintAssignable, Category="Lizard|Catch") FOnLizardCaught OnCaughtByHand;
+    UFUNCTION(BlueprintCallable, Category="Lizard|Training") void ResetTrainingDoll(const FTransform& TableTransform);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Lizard|Threat", meta=(Units="cm", ClampMin="0", ToolTip="Hand proximity distance that starts alert/flee behavior."))
     float DetectionRadius = 80.f;
