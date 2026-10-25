@@ -11,6 +11,13 @@ class UStaticMeshComponent;
 class UWidgetComponent;
 class ASmokePuffGameplayActor;
 class ALizardGameplayActor;
+class USkeletalMeshComponent;
+class UAnimSequence;
+class USkeletalMesh;
+class UAnimInstance;
+class USoundBase;
+class USoundAttenuation;
+class UAudioComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnLizardStored, ALizardGameplayActor*, Lizard, AActor*, Container);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLizardCaught, ALizardGameplayActor*, Lizard);
 
@@ -22,7 +29,31 @@ class CTLPROJECT_API ALizardGameplayActor : public AActor
 
 public:
     ALizardGameplayActor();
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Audio") bool bEnableRealLizardVoice = false;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Audio") TObjectPtr<USoundBase> LizardVoiceSound;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Audio", meta=(ClampMin="0", ClampMax="1")) float LizardVoiceVolume = .65f;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Audio", meta=(ClampMin=".1", Units="s")) float LizardVoiceMinInterval = 5.f;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Audio", meta=(ClampMin=".1", Units="s")) float LizardVoiceMaxInterval = 10.f;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Audio") TObjectPtr<USoundAttenuation> LizardVoiceAttenuation;
+    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Lizard|Audio") float NextLizardVoiceTime = -1.f;
+    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Lizard|Mission") bool bChallengeActive = true;
+    void SetChallengeActive(bool Active);
     virtual void Tick(float DeltaSeconds) override;
+    virtual void OnConstruction(const FTransform& Transform) override;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Animation|Visual") TObjectPtr<USkeletalMesh> AnimatedSkeletalMesh;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Animation|Visual") TSubclassOf<UAnimInstance> AnimationBlueprintClass;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Animation") TObjectPtr<UAnimSequence> IdleAnimation;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Animation") TObjectPtr<UAnimSequence> MovementAnimation;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Animation", meta=(ClampMin="0", Units="cm/s")) float AnimationMovementThreshold = 1.f;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Animation", meta=(ClampMin="0", Units="s")) float AnimationBlendSeconds = .12f;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Animation", meta=(ClampMin=".1", Units="cm/s")) float AnimationReferenceSpeed = 10.f;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Animation", meta=(ClampMin="0")) float AnimationMinPlayRate = .25f;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Animation", meta=(ClampMin=".1")) float AnimationMaxPlayRate = 8.f;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Animation|Visual") FRotator AnimatedMeshRotation = FRotator::ZeroRotator;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Animation|Visual") FVector AnimatedMeshScale = FVector::OneVector;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Animation|Visual", meta=(Units="cm", ToolTip="Actor-local offset; actor Z follows the supporting surface normal. Native surface stand-off is 9 cm.")) FVector AnimatedMeshContactOffset = FVector(0, 0, -9.f);
+    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Lizard|Animation") float SurfaceLocomotionSpeed = 0.f;
+    UFUNCTION(BlueprintPure, Category="Lizard|Animation") bool CanPlaySurfaceLocomotion() const;
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Training") bool bTrainingDoll = false;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Lizard|Training") bool bTrainingPickupEnabled = true;
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Lizard|Training") TObjectPtr<AActor> TrainingContainer;
@@ -150,6 +181,7 @@ public:
     UFUNCTION(BlueprintCallable, Category="Lizard|Catch") void FinishDrop(FVector Location, FVector Normal);
     UFUNCTION(BlueprintCallable, Category="Lizard|Catch") void UpdateDroppedMotion(float DeltaSeconds, bool& CanMove);
     UFUNCTION(BlueprintCallable, Category="Lizard|Collection") void TryStoreInBottle(AActor* Bottle, bool& Accepted);
+    void DisplayInsideContainer(USceneComponent* Slot, const FVector& VisualScale, const FVector& VisualOffset);
     UFUNCTION(BlueprintCallable, Category="Lizard|Broom") void ReceiveRake(FVector RakeOrigin, bool& Accepted);
     UFUNCTION(BlueprintCallable, Category="Lizard|Broom") void FindReachableRakeSurface(bool& Found);
     UFUNCTION(BlueprintCallable, Category="Lizard|Broom") float ResolveRakeFloor();
@@ -166,7 +198,16 @@ protected:
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+    void PlayLizardVoice();
+    void StopLizardVoice();
+    bool CanPlayLizardVoice() const;
+    void UpdateLizardVoiceSchedule();
+    void ScheduleLizardVoice();
+    FTimerHandle LizardVoiceTimer;
+    FRandomStream LizardVoiceRandom;
+    TWeakObjectPtr<UAudioComponent> LizardVoicePlayer;
     void ResolveInteractionComponents();
+    void ConfigureAnimatedVisual();
     void BindCatchInput();
     void TryCatch(USceneComponent* Hand, UPrimitiveComponent* HandVolume);
     void ReleaseLeft();
@@ -185,6 +226,7 @@ private:
     float Now() const;
     FCollisionQueryParams TraceParameters(bool IgnoreRakeActors = false) const;
     TWeakObjectPtr<UStaticMeshComponent> BodyMesh;
+    TWeakObjectPtr<USkeletalMeshComponent> AnimatedBodyMesh;
     TWeakObjectPtr<UPrimitiveComponent> CatchVolume;
     TWeakObjectPtr<USceneComponent> StunHalo;
     TWeakObjectPtr<UWidgetComponent> SprayStatusWidget;

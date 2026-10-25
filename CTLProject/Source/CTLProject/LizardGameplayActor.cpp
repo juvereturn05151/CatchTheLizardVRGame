@@ -1,12 +1,17 @@
 #include "LizardGameplayActor.h"
+#include "CTLSoundEffects.h"
+#include "StoredLizardDisplayComponent.h"
+#include "Animation/AnimSequence.h"
 
 #include "LizardBlueprintBridge.h"
 #include "LizardStatusWidget.h"
 #include "SmokePuffGameplayActor.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Components/PrimitiveComponent.h"
+#include "Components/AudioComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
 #include "Engine/World.h"
@@ -49,9 +54,34 @@ float ALizardGameplayActor::Now() const
     return GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
 }
 
+void ALizardGameplayActor::OnConstruction(const FTransform& Transform)
+{
+    Super::OnConstruction(Transform);
+    ConfigureAnimatedVisual();
+}
+void ALizardGameplayActor::ConfigureAnimatedVisual()
+{
+    AnimatedBodyMesh = NamedComponent<USkeletalMeshComponent>(this, TEXT("LizardAnimatedBody"));
+    if (!AnimatedBodyMesh.IsValid() || !AnimatedSkeletalMesh) return;
+    AnimatedBodyMesh->SetSkeletalMeshAsset(AnimatedSkeletalMesh);
+    AnimatedBodyMesh->SetAnimInstanceClass(AnimationBlueprintClass);
+    AnimatedBodyMesh->SetRelativeLocationAndRotation(AnimatedMeshContactOffset, AnimatedMeshRotation);
+    AnimatedBodyMesh->SetRelativeScale3D(AnimatedMeshScale);
+    AnimatedBodyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    if (auto* LegacyBody = NamedComponent<UStaticMeshComponent>(this, TEXT("LizardBody"))) LegacyBody->SetVisibility(false);
+}
+
 void ALizardGameplayActor::ResolveInteractionComponents()
 {
     BodyMesh = NamedComponent<UStaticMeshComponent>(this, TEXT("LizardBody"));
+    ConfigureAnimatedVisual();
+    if (AnimatedBodyMesh.IsValid()) {
+        AnimatedBodyMesh->SetRelativeLocationAndRotation(AnimatedMeshContactOffset, AnimatedMeshRotation);
+        AnimatedBodyMesh->SetRelativeScale3D(AnimatedMeshScale);
+        AnimatedBodyMesh->AddTickPrerequisiteActor(this);
+        AnimatedBodyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        if (BodyMesh.IsValid()) BodyMesh->SetVisibility(false);
+    }
     CatchVolume = NamedComponent<UPrimitiveComponent>(this, TEXT("CatchSphere"));
     StunHalo = NamedComponent<USceneComponent>(this, TEXT("SmokeStunHalo"));
     SprayStatusWidget = NamedComponent<UWidgetComponent>(this, TEXT("SprayStatusWidget"));
@@ -65,6 +95,7 @@ void ALizardGameplayActor::ResolveInteractionComponents()
 void ALizardGameplayActor::BeginPlay()
 {
     Super::BeginPlay();
+    LizardVoiceRandom.Initialize(static_cast<int32>(GetUniqueID()) ^ FMath::Rand());
     ResolveInteractionComponents();
     BroomClass.LoadSynchronous();
     if (!BodyMesh.IsValid() || !CatchVolume.IsValid() || !LeftHand || !RightHand)
@@ -77,6 +108,7 @@ void ALizardGameplayActor::BeginPlay()
     if (SprayStatusWidget.IsValid()) SprayStatusWidget->InitWidget();
     else UE_LOG(LogTemp, Error, TEXT("%s: missing Blueprint SprayStatusWidget component"), *GetName());
     UpdateSprayWidget();
+    UpdateLizardVoiceSchedule();
 }
 
 void ALizardGameplayActor::BindCatchInput()
@@ -100,12 +132,22 @@ void ALizardGameplayActor::BindCatchInput()
 
 void ALizardGameplayActor::StartThreatTimer()
 {
-    if (bTrainingDoll) return;
+    if (!bChallengeActive || bTrainingDoll) return;
     GetWorldTimerManager().SetTimer(ThreatTimer, this, &ALizardGameplayActor::SenseThreat, FMath::Max(.01f, FleeReevaluateInterval), true);
+}
+
+void ALizardGameplayActor::SetChallengeActive(bool Active)
+{
+    bChallengeActive = Active;
+    if (!Active) StopLizardVoice();
+    if (!Active) SurfaceLocomotionSpeed = 0;
+    if (Active && !Caught && !bStored) StartThreatTimer();
+    if (Active) UpdateLizardVoiceSchedule();
 }
 
 void ALizardGameplayActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    StopLizardVoice();
     GetWorldTimerManager().ClearTimer(ThreatTimer);
     GetWorldTimerManager().ClearTimer(FeedbackTimer);
     Super::EndPlay(EndPlayReason);
@@ -114,7 +156,9 @@ void ALizardGameplayActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ALizardGameplayActor::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
-    if (Caught || bStored) return;
+    UpdateLizardVoiceSchedule();
+    SurfaceLocomotionSpeed = 0.f;
+    if (!bChallengeActive || Caught || bStored) return;
     if (bTrainingDoll)
     {
         bool CanMove = false;
@@ -143,6 +187,8 @@ FCollisionQueryParams ALizardGameplayActor::TraceParameters(bool IgnoreRakeActor
 void ALizardGameplayActor::MoveOnSurface(float DeltaSeconds)
 {
     const FVector Position = GetActorLocation();
+    const FVector PreviousNormal = SurfaceNormal;
+    bool bOrdinarySurfaceStep = false;
     const float Speed = Fleeing ? (Now() - ReactionTime > AlertDuration ? FleeSpeed : 0.f) : WanderSpeed;
     const float Step = Speed * DeltaSeconds;
     FHitResult Hit;
@@ -159,11 +205,23 @@ void ALizardGameplayActor::MoveOnSurface(float DeltaSeconds)
         if (GetWorld()->LineTraceSingleByChannel(Hit, Destination, Destination - SurfaceNormal * 35.f, ECC_Visibility, TraceParameters()))
         {
             SurfaceNormal = Hit.Normal;
+            bOrdinarySurfaceStep = true;
             SetActorLocation(Hit.Location + Hit.Normal * 9.f, false, nullptr, ETeleportType::TeleportPhysics);
         }
         else MoveDirection = -MoveDirection;
     }
     SetActorRotation(FRotationMatrix::MakeFromXZ(MoveDirection, SurfaceNormal).Rotator(), ETeleportType::TeleportPhysics);
+    // Measure just this supported step, never actor velocity or inter-frame position deltas.
+    // Corner snaps, pawn teleport, held motion, gravity and broom relocation cannot inflate it.
+    const FVector Displacement = GetActorLocation() - Position;
+    if (bOrdinarySurfaceStep && DeltaSeconds > SMALL_NUMBER && FVector::DotProduct(PreviousNormal, SurfaceNormal) > .95f
+        && Displacement.Size() <= Step * 1.5f + .5f)
+        SurfaceLocomotionSpeed = FVector::VectorPlaneProject(Displacement, SurfaceNormal).Size() / DeltaSeconds;
+}
+
+bool ALizardGameplayActor::CanPlaySurfaceLocomotion() const
+{
+    return bChallengeActive && !bTrainingDoll && !Caught && !bStored && !bDropped && !bSmokeStunned && !bSmokeFalling && !bWasRaked && IsActorTickEnabled();
 }
 
 void ALizardGameplayActor::ConsiderThreatPosition(FVector Position, float RadiusBonus)
@@ -182,7 +240,7 @@ void ALizardGameplayActor::SetFleeDirectionFromThreat(FVector Origin)
 
 void ALizardGameplayActor::SenseThreat()
 {
-    if (bTrainingDoll) return;
+    if (!bChallengeActive || bTrainingDoll) return;
     if (Caught || bStored || bDropped || bSmokeStunned || bWasRaked) return;
     ClosestDistance = 100000.f;
     if (IsValid(LeftHand)) ConsiderThreatPosition(LeftHand->GetComponentLocation(), 0.f);
@@ -219,9 +277,50 @@ void ALizardGameplayActor::SenseThreat()
     }
 }
 
+void ALizardGameplayActor::PlayLizardVoice()
+{
+    NextLizardVoiceTime = -1.f;
+    if (!CanPlayLizardVoice()) { StopLizardVoice(); return; }
+    if (LizardVoicePlayer.IsValid() && LizardVoicePlayer->IsPlaying()) { ScheduleLizardVoice(); return; }
+    const auto* Audio = UCTLSoundEffectsSubsystem::Get(this);
+    const auto* Library = Audio ? Audio->GetLibrary() : nullptr;
+    if (Library && GetRootComponent())
+        LizardVoicePlayer = UGameplayStatics::SpawnSoundAttached(LizardVoiceSound, GetRootComponent(), NAME_None,
+            FVector::ZeroVector, EAttachLocation::KeepRelativeOffset, true,
+            FMath::Clamp(LizardVoiceVolume * Library->MasterVolume, 0.f, 1.f), 1.f, 0.f,
+            LizardVoiceAttenuation ? LizardVoiceAttenuation.Get() : Library->WorldAttenuation.Get());
+    ScheduleLizardVoice();
+}
+
+bool ALizardGameplayActor::CanPlayLizardVoice() const
+{
+    return bEnableRealLizardVoice && !bTrainingDoll && LizardVoiceSound && bChallengeActive && IsActorTickEnabled()
+        && !Caught && !bStored && !bSmokeStunned && !bSmokeFalling && !bDropped;
+}
+void ALizardGameplayActor::ScheduleLizardVoice()
+{
+    if (!CanPlayLizardVoice()) return;
+    const float Min = FMath::Max(.1f, LizardVoiceMinInterval);
+    const float Delay = LizardVoiceRandom.FRandRange(Min, FMath::Max(Min, LizardVoiceMaxInterval));
+    NextLizardVoiceTime = Now() + Delay;
+    GetWorldTimerManager().SetTimer(LizardVoiceTimer, this, &ALizardGameplayActor::PlayLizardVoice, Delay, false);
+}
+void ALizardGameplayActor::UpdateLizardVoiceSchedule()
+{
+    if (!CanPlayLizardVoice()) { StopLizardVoice(); return; }
+    if (!GetWorldTimerManager().IsTimerActive(LizardVoiceTimer)) ScheduleLizardVoice();
+}
+
+void ALizardGameplayActor::StopLizardVoice()
+{
+    GetWorldTimerManager().ClearTimer(LizardVoiceTimer); NextLizardVoiceTime = -1.f;
+    if (LizardVoicePlayer.IsValid()) LizardVoicePlayer->Stop();
+    LizardVoicePlayer.Reset();
+}
+
 bool ALizardGameplayActor::GameplayInputLocked() const
 {
-    return Bool(UGameplayStatics::GetPlayerPawn(this, 0), TEXT("bCollectionInputLocked"));
+    return !bChallengeActive || Bool(UGameplayStatics::GetPlayerPawn(this, 0), TEXT("bCollectionInputLocked"));
 }
 
 void ALizardGameplayActor::CanCatchWithHand(USceneComponent* Hand, bool& Allowed)
@@ -249,6 +348,7 @@ void ALizardGameplayActor::TryCatch(USceneComponent* Hand, UPrimitiveComponent* 
     CanCatchWithHand(Hand, Allowed);
     if (!Allowed || !CatchVolume.IsValid() || !IsValid(HandVolume) || !CatchVolume->IsOverlappingComponent(HandVolume)) return;
     CacheCatchSurface();
+    StopLizardVoice();
     const FAttachmentTransformRules Rules(EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, false);
     if (!AttachToComponent(Hand, Rules)) return;
     Caught = true;
@@ -260,6 +360,7 @@ void ALizardGameplayActor::TryCatch(USceneComponent* Hand, UPrimitiveComponent* 
     ApplyFeedback(CatchFeedbackColor, CatchAndDazeBodyScale, false);
     StartFeedbackPulse();
     OnCaughtByHand.Broadcast(this);
+    if (auto* Audio = UCTLSoundEffectsSubsystem::Get(this)) Audio->PlayEffect(this, ECTLSoundEffect::ObjectPickup, GetActorLocation());
 }
 
 void ALizardGameplayActor::TryCatchLeft() { TryCatch(LeftHand, HandOverlapLeft); }
@@ -296,7 +397,7 @@ void ALizardGameplayActor::FinishDrop(FVector Location, FVector Normal)
 void ALizardGameplayActor::UpdateDroppedMotion(float DeltaSeconds, bool& CanMove)
 {
     CanMove = false;
-    if (Caught || bStored) return;
+    if (!bChallengeActive || Caught || bStored) return;
     if (!bDropped) { CanMove = true; return; }
     DropSpeedCmPerSecond = FMath::Min(DropSpeedCmPerSecond + DeltaSeconds * 980.f, 1000.f);
     const FVector Destination = GetActorLocation() - FVector(0, 0, DropSpeedCmPerSecond * DeltaSeconds);
@@ -334,6 +435,7 @@ void ALizardGameplayActor::TryStoreInBottle(AActor* Bottle, bool& Accepted)
     }
     else if (!Bool(Grab, TEXT("bIsHeld")) || !IsValid(BottleHand) || CatchHand == BottleHand) return;
     bStored = true; // Set terminal state before any detach, overlap, or timer callbacks can run.
+    StopLizardVoice();
     CancelSmokeState();
     bDropped = bSmokeStunned = bWasRaked = Fleeing = false;
     ForceFleeUntil = 0.f;
@@ -345,9 +447,51 @@ void ALizardGameplayActor::TryStoreInBottle(AActor* Bottle, bool& Accepted)
     GetWorldTimerManager().ClearTimer(FeedbackTimer);
     DisableInput(UGameplayStatics::GetPlayerController(this, 0));
     if (StunHalo.IsValid()) StunHalo->SetVisibility(false);
+    if (SprayStatusWidget.IsValid()) SprayStatusWidget->SetVisibility(false);
+    if (auto* Contents = Bottle->FindComponentByClass<UStoredLizardDisplayComponent>()) Contents->ShowStoredLizard(this);
     // Preserve Caught=true for existing collection/catch guards; bStored prevents every recovery path.
     Accepted = true;
+    if (auto* Audio = UCTLSoundEffectsSubsystem::Get(this)) Audio->PlayEffect(this, ECTLSoundEffect::ContainerCapture, Bottle->GetActorLocation());
     OnStoredInContainer.Broadcast(this, Bottle);
+}
+
+void ALizardGameplayActor::DisplayInsideContainer(USceneComponent* Slot, const FVector& VisualScale, const FVector& VisualOffset)
+{
+    if (!bStored || !IsValid(Slot)) return;
+    TArray<UPrimitiveComponent*> Parts;
+    GetComponents(Parts);
+    for (auto* Part : Parts)
+    {
+        Part->SetSimulatePhysics(false); Part->SetCollisionEnabled(ECollisionEnabled::NoCollision); Part->SetGenerateOverlapEvents(false);
+        Part->SetVisibility(false); Part->SetHiddenInGame(true); // Hide gameplay indicators/UI as well as legacy meshes.
+    }
+    ApplyFeedback(NormalFeedbackColor, NormalBodyScale, false);
+    AttachToComponent(Slot, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+    SetActorRelativeTransform(FTransform::Identity);
+    SetActorHiddenInGame(false);
+    SurfaceLocomotionSpeed = 0.f;
+    if (AnimatedBodyMesh.IsValid())
+    {
+        AnimatedBodyMesh->SetRelativeLocationAndRotation(VisualOffset, AnimatedMeshRotation);
+        AnimatedBodyMesh->SetRelativeScale3D(AnimatedMeshScale * VisualScale);
+        AnimatedBodyMesh->SetVisibility(true); AnimatedBodyMesh->SetHiddenInGame(false);
+        if (IdleAnimation)
+        {
+            AnimatedBodyMesh->PlayAnimation(IdleAnimation, false);
+            AnimatedBodyMesh->SetPosition(0.f, false);
+            AnimatedBodyMesh->TickAnimation(0.f, false);
+            AnimatedBodyMesh->RefreshBoneTransforms();
+        }
+        AnimatedBodyMesh->bPauseAnims = true;
+        AnimatedBodyMesh->SetComponentTickEnabled(false);
+        if (BodyMesh.IsValid()) BodyMesh->SetVisibility(false);
+    }
+    else if (BodyMesh.IsValid())
+    {
+        BodyMesh->SetRelativeLocation(VisualOffset);
+        BodyMesh->SetRelativeScale3D(NormalBodyScale * VisualScale);
+        BodyMesh->SetVisibility(true); BodyMesh->SetHiddenInGame(false);
+    }
 }
 
 void ALizardGameplayActor::ResetTrainingDoll(const FTransform& TableTransform)
@@ -419,7 +563,7 @@ void ALizardGameplayActor::FindReachableRakeSurface(bool& Found)
 void ALizardGameplayActor::ReceiveRake(FVector RakeOrigin, bool& Accepted)
 {
     Accepted = false;
-    if (bTrainingDoll) return;
+    if (!bChallengeActive || bTrainingDoll) return;
     if (Caught || bStored || bDropped || bSmokeStunned || Now() < RakeReadyTime) return;
     bool Found = false;
     FindReachableRakeSurface(Found);
@@ -489,10 +633,12 @@ void ALizardGameplayActor::UpdateExposureDecay(float DeltaSeconds)
 void ALizardGameplayActor::BeginSmokeStun()
 {
     if (Caught || bStored || bSmokeStunned) return;
+    StopLizardVoice();
     CacheCatchSurface();
     DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
     SmokeExposurePercent = 100.f;
     bSmokeStunned = true;
+    if (auto* Audio = UCTLSoundEffectsSubsystem::Get(this)) Audio->PlayEffect(this, ECTLSoundEffect::StunActivated, GetActorLocation());
     bSmokeFalling = true;
     bDropped = false;
     SmokeFallVelocity = FVector::ZeroVector;
@@ -574,7 +720,7 @@ void ALizardGameplayActor::CancelSmokeState()
 void ALizardGameplayActor::UpdateSmokeStatus(float DeltaSeconds, bool& CanMove)
 {
     CanMove = false;
-    if (Caught || bStored) return;
+    if (!bChallengeActive || Caught || bStored) return;
     if (bSmokeStunned)
     {
         if (bSmokeFalling) { UpdateStunnedFall(DeltaSeconds); return; }
@@ -611,6 +757,11 @@ void ALizardGameplayActor::ApplyFeedback(const FVector& Color, const FVector& Sc
     {
         BodyMesh->SetVectorParameterValueOnMaterials(FeedbackColorParameter, Color);
         BodyMesh->SetRelativeScale3D(Scale);
+        if (AnimatedBodyMesh.IsValid()) {
+            const float Pulse = Scale.X / FMath::Max(.001f, NormalBodyScale.X);
+            AnimatedBodyMesh->SetRelativeScale3D(AnimatedMeshScale * Pulse);
+            AnimatedBodyMesh->SetVectorParameterValueOnMaterials(FeedbackColorParameter, Color);
+        }
     }
     if (StunHalo.IsValid()) StunHalo->SetVisibility(ShowHalo);
 }

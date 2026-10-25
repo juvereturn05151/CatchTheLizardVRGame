@@ -43,4 +43,5 @@ private:
     TSet<TWeakObjectPtr<AActor>> AttemptedThisSample;
     FTransform PreviousPawnTransform;
     TWeakObjectPtr<AActor> PreviousHoldingPawn;
+    bool bSwingAudioArmed = true;
 };

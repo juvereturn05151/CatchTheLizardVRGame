@@ -1,6 +1,10 @@
 #include "SprayGameplayActor.h"
+#include "CTLSoundEffects.h"
+#include "Components/AudioComponent.h"
 #include "SmokePuffGameplayActor.h"
 #include "LizardGameplayActor.h"
+#include "MissionFlow.h"
+#include "EmergencySprayButton.h"
 #include "ToolBlueprintBridge.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -27,6 +31,14 @@ void ASprayGameplayActor::BeginPlay()
 {
     Super::BeginPlay();
     ResolveComponents();
+    // Add only after the Blueprint SCS has established its physics/grab root.
+    SprayAudio = NewObject<UAudioComponent>(this, TEXT("SprayAudio"));
+    SprayAudio->bAutoActivate = false;
+    SprayAudio->bAllowSpatialization = true;
+    SprayAudio->bStopWhenOwnerDestroyed = true;
+    SprayAudio->bCanPlayMultipleInstances = false;
+    SprayAudio->SetupAttachment(NozzleComponent.IsValid() ? NozzleComponent.Get() : GetRootComponent());
+    SprayAudio->RegisterComponent();
     if (!SmokePuffClass) UE_LOG(LogTemp, Error, TEXT("%s: missing Blueprint smoke puff class"), *GetName());
     if (!GrabState.IsValid() || !NozzleComponent.IsValid())
         UE_LOG(LogTemp, Error, TEXT("%s: missing Blueprint GrabComponent or Nozzle"), *GetName());
@@ -34,11 +46,15 @@ void ASprayGameplayActor::BeginPlay()
         || !ConnectGrabSignal(GrabState.Get(), TEXT("OnDropped"), this, TEXT("OnGrabStateChanged")))
         UE_LOG(LogTemp, Error, TEXT("%s: incompatible BP_GrabComponent signals"), *GetName());
     BindTriggerInput();
+    // Restrict only worlds using the new mission flow; unrelated maps retain their tools.
+    for (TActorIterator<AMissionDirector> It(GetWorld()); It; ++It)
+        if (!It->bEmergencyRating || !Cast<AEmergencySprayButton>(GetOwner())) { Destroy(); return; }
 }
 
 void ASprayGameplayActor::OnGrabStateChanged()
 {
     bEmitting = false;
+    SetSprayAudioActive(false);
     EmissionClock = 0.f;
 }
 
@@ -47,6 +63,7 @@ void ASprayGameplayActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
     ConnectGrabSignal(GrabState.Get(), TEXT("OnGrabbed"), this, TEXT("OnGrabStateChanged"), false);
     ConnectGrabSignal(GrabState.Get(), TEXT("OnDropped"), this, TEXT("OnGrabStateChanged"), false);
     OnGrabStateChanged();
+    SprayAudio->Stop();
     Super::EndPlay(EndPlayReason);
 }
 
@@ -104,12 +121,14 @@ void ASprayGameplayActor::UpdateEmission(float DeltaSeconds, bool TriggerPressed
     if (!HoldingController(GrabState.Get()) || !TriggerPressed || GameplayLocked(this))
     {
         bEmitting = false;
+        SetSprayAudioActive(false);
         EmissionClock = 0.f;
         return;
     }
     if (!bEmitting)
     {
         bEmitting = true;
+        SetSprayAudioActive(true);
         EmissionClock = 0.f;
         EmitSmokePuff();
         return;
@@ -120,6 +139,25 @@ void ASprayGameplayActor::UpdateEmission(float DeltaSeconds, bool TriggerPressed
         EmissionClock = 0.f;
         EmitSmokePuff();
     }
+}
+
+void ASprayGameplayActor::SetSprayAudioActive(bool Active)
+{
+    if (bSprayAudioActive == Active) return;
+    bSprayAudioActive = Active;
+    auto* Audio = UCTLSoundEffectsSubsystem::Get(this);
+    const auto* Library = Audio ? Audio->GetLibrary() : nullptr;
+    if (!Active)
+    {
+        if (SprayAudio->IsPlaying()) SprayAudio->FadeOut(Library ? Library->SprayFadeOutSeconds : .12f, 0.f);
+        return;
+    }
+    if (!Library || !Library->SprayLoop.Sound) return;
+    // A fast re-press reuses the one component, cancelling its old fading voice first.
+    SprayAudio->Stop();
+    SprayAudio->SetSound(Library->SprayLoop.Sound);
+    SprayAudio->AttenuationSettings = Library->WorldAttenuation;
+    SprayAudio->FadeIn(Library->SprayFadeInSeconds, FMath::Clamp(Library->MasterVolume * Library->SprayLoop.Volume, 0.f, 1.f));
 }
 
 void ASprayGameplayActor::EmitSmokePuff()

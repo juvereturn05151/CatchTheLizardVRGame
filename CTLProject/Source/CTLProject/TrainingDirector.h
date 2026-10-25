@@ -3,6 +3,7 @@
 #include "GameFramework/Actor.h"
 #include "TrainingDirector.generated.h"
 class ALizardGameplayActor;
+class AMissionDirector;
 class UCTLLevelList;
 class UWidgetComponent;
 class USphereComponent;
@@ -22,6 +23,7 @@ class CTLPROJECT_API ATrainingDirector : public AActor
     GENERATED_BODY()
 public:
     ATrainingDirector();
+    UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="Tutorial|References") TObjectPtr<AMissionDirector> ExitMission;
     UFUNCTION(BlueprintCallable, Category="Tutorial") void AdvanceDialogue();
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Tutorial") ETrainingState State = ETrainingState::Welcome;
     UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category="Tutorial|References") TObjectPtr<ALizardGameplayActor> TrainingDoll;

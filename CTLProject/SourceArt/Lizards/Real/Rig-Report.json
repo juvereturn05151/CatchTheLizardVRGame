@@ -1,0 +1,125 @@
+{
+  "blender": "5.2.2 LTS",
+  "source": "C:\\Users\\drago\\Downloads\\beige+gecko+3d+model\\tripo_convert_0bb5d3c7-433f-4e7e-aced-91f2365c38d8.fbx",
+  "original_hashes": {
+    "tripo_convert_0bb5d3c7-433f-4e7e-aced-91f2365c38d8.fbx": "806bdedd158eb2dddc7e133294c11136bd13d06ed21eb87948d4c63df4c33c24",
+    "tripo_convert_0bb5d3c7-433f-4e7e-aced-91f2365c38d8.fbm\\beige_gecko_3d_model_basecolor.PNG": "2ff819974ca58de11814183ed8e0406acf4a646546e995fb1f87b88abd9ea1e7",
+    "tripo_convert_0bb5d3c7-433f-4e7e-aced-91f2365c38d8.fbm\\beige_gecko_3d_model_metallic.PNG": "c974fe99ce387a843a679fa4b620786ffeb905159ac82b68481527523f6fce6b",
+    "tripo_convert_0bb5d3c7-433f-4e7e-aced-91f2365c38d8.fbm\\beige_gecko_3d_model_normal.PNG": "1cb9e6043a9cf3d89f397c463574b302fc9482a0b7d16718eabb782f4a54b219",
+    "tripo_convert_0bb5d3c7-433f-4e7e-aced-91f2365c38d8.fbm\\beige_gecko_3d_model_rm.PNG": "3584723189c0e2b2a3b5fa9bf2cf22d1ee48f0adb6f223881fc20cc766d8010f",
+    "tripo_convert_0bb5d3c7-433f-4e7e-aced-91f2365c38d8.fbm\\beige_gecko_3d_model_roughness.PNG": "2dd2b0c26fe96386402663e9d4d31a423fe6dd3200fc3e37e635710fc22013fa"
+  },
+  "source_bounds": [
+    [
+      -0.26312268979599834,
+      -0.48898315,
+      9.128542762302205e-08
+    ],
+    [
+      0.263122537208109,
+      0.48898315,
+      0.18563855961750492
+    ]
+  ],
+  "source_triangles": 17287,
+  "game_triangles": 9999,
+  "vertices": 4998,
+  "deform_bones": 22,
+  "control_bones": 4,
+  "max_influences": 4,
+  "unweighted_vertices": 0,
+  "length_cm": 28,
+  "forward_axis": "+X",
+  "surface_normal": "+Z",
+  "root_translation_cm": [
+    0,
+    0,
+    0.1
+  ],
+  "crawl_seconds": 0.5333333333333333,
+  "stride_cm": 1.5,
+  "reference_speed_cm_s": 2.8125,
+  "loop_endpoint_vertex_error_cm": 0.0,
+  "foot_contact_samples": [
+    {
+      "frame": 1,
+      "foot_min_z_cm": {
+        "FL": 0.13725143671035767,
+        "FR": 0.015000555664300919,
+        "HL": 0.01499988604336977,
+        "HR": 0.1033511757850647
+      }
+    },
+    {
+      "frame": 5,
+      "foot_min_z_cm": {
+        "FL": 0.0329529233276844,
+        "FR": 0.31374475359916687,
+        "HL": 0.3137435019016266,
+        "HR": 0.015002310276031494
+      }
+    },
+    {
+      "frame": 9,
+      "foot_min_z_cm": {
+        "FL": 0.015002385713160038,
+        "FR": 0.09247330576181412,
+        "HL": 0.015000184066593647,
+        "HR": 0.015002429485321045
+      }
+    },
+    {
+      "frame": 13,
+      "foot_min_z_cm": {
+        "FL": 0.3137475848197937,
+        "FR": 0.015000851824879646,
+        "HL": 0.014999945648014545,
+        "HR": 0.3137458562850952
+      }
+    },
+    {
+      "frame": 17,
+      "foot_min_z_cm": {
+        "FL": 0.13725143671035767,
+        "FR": 0.015000555664300919,
+        "HL": 0.01499988604336977,
+        "HR": 0.1033511757850647
+      }
+    }
+  ],
+  "actions": [
+    "Real_Idle",
+    "Real_Crawl"
+  ],
+  "export_axes": [
+    "-Y",
+    "Z"
+  ],
+  "scene_unit_meters": 0.01,
+  "source_unit_correction": 0.009999999912126318,
+  "textures": [
+    {
+      "name": "Diffuse Texture",
+      "packed": true,
+      "path": "E:\\CatchTheLizardVR\\CatchTheLizardVRGame\\CTLProject\\SourceArt\\Lizards\\Originals\\beige+gecko+3d+model\\tripo_convert_0bb5d3c7-433f-4e7e-aced-91f2365c38d8.fbm\\beige_gecko_3d_model_basecolor.PNG"
+    },
+    {
+      "name": "Diffuse Texture.001",
+      "packed": true,
+      "path": "E:\\CatchTheLizardVR\\CatchTheLizardVRGame\\CTLProject\\SourceArt\\Lizards\\Originals\\beige+gecko+3d+model\\tripo_convert_0bb5d3c7-433f-4e7e-aced-91f2365c38d8.fbm\\beige_gecko_3d_model_normal.PNG"
+    },
+    {
+      "name": "Diffuse Texture.003",
+      "packed": true,
+      "path": "E:\\CatchTheLizardVR\\CatchTheLizardVRGame\\CTLProject\\SourceArt\\Lizards\\Originals\\beige+gecko+3d+model\\tripo_convert_0bb5d3c7-433f-4e7e-aced-91f2365c38d8.fbm\\beige_gecko_3d_model_roughness.PNG"
+    },
+    {
+      "name": "Diffuse Texture.004",
+      "packed": true,
+      "path": "E:\\CatchTheLizardVR\\CatchTheLizardVRGame\\CTLProject\\SourceArt\\Lizards\\Originals\\beige+gecko+3d+model\\tripo_convert_0bb5d3c7-433f-4e7e-aced-91f2365c38d8.fbm\\beige_gecko_3d_model_metallic.PNG"
+    }
+  ],
+  "foot_curve": "cosine stance, cosine swing, squared-sine lift; stationary root",
+  "source_legacy_skin_groups_removed": 77,
+  "constant_surface_clearance_cm": 0.1
+}

@@ -1,4 +1,7 @@
 #include "TrainingDirector.h"
+#include "MissionFlow.h"
+#include "CTLBackgroundMusic.h"
+#include "CTLSoundEffects.h"
 #include "LizardGameplayActor.h"
 #include "CTLLevelList.h"
 #include "TutorialWidgets.h"
@@ -47,8 +50,9 @@ ATrainingDirector::ATrainingDirector()
     WelcomeDialogue = NSLOCTEXT("CTLTraining", "Welcome", "Welcome aboard, our newest lizard-catching recruit! Before your first assignment, let's practice with something that won't run away.");
     PracticeDialogue = NSLOCTEXT("CTLTraining", "Practice", "This is our training lizard. Pick it up and place it inside the container on the table.");
     SuccessDialogue = NSLOCTEXT("CTLTraining", "Success", "Nice work! That's your first capture. The real ones may be a little less cooperative.");
-    BroomDialogue = NSLOCTEXT("CTLTraining", "Broom", "Grip the broom handle to pick it up. A held broom tip makes nearby lizards flee away from it: approach from the opposite side to guide them toward a smaller space. A fast tip contact can move a lizard to a nearby reachable surface and briefly daze it. Release grip to drop the broom. No broom practice is required here.");
-    FinishDialogue = NSLOCTEXT("CTLTraining", "Finish", "You're ready for your first assignment. Let's put that training to work!");
+    BroomDialogue = FText::GetEmpty();
+    FinishDialogue = NSLOCTEXT("CTLTraining", "ManualExit", "Training complete! Open the door and leave to begin your first assignment.");
+    SuccessDialogue = FinishDialogue;
     CaptureObjective = NSLOCTEXT("CTLTraining", "Objective", "Pick up the training lizard and place it inside the container.");
     GripInstructions = NSLOCTEXT("CTLTraining", "Grip", "Touch the doll with either hand and hold that controller's GRIP button. While still holding grip, move the doll into the open container. Release grip to drop and retry. Use the INDEX TRIGGER for Continue.");
     ContinueLabel = NSLOCTEXT("CTLTraining", "Continue", "Continue");
@@ -64,9 +68,9 @@ void ATrainingDirector::BeginPlay()
     Dialogue = Cast<UTutorialDialogueWidget>(DialoguePanel->GetUserWidgetObject());
     Objective = Cast<UTutorialObjectiveWidget>(ObjectivePanel->GetUserWidgetObject());
     Mouth = Cast<USphereComponent>(LizardBlueprintBridge::Object(CaptureContainer, TEXT("DepositVolume")));
-    if (!TrainingDoll || !TrainingDoll->bTrainingDoll || !CaptureContainer || !TrainingBroom || !Mouth || !Dialogue || !Objective || !LevelList)
+    if (!TrainingDoll || !TrainingDoll->bTrainingDoll || !CaptureContainer || !Mouth || !Dialogue || !Objective || !LevelList)
     {
-        UE_LOG(LogTemp, Error, TEXT("TrainingDirector requires its configured doll, container/DepositVolume, broom, UMG widgets and level list."));
+        UE_LOG(LogTemp, Error, TEXT("TrainingDirector requires its configured doll, container/DepositVolume, exit mission, UMG widgets and level list."));
         if (Dialogue) Dialogue->Present(NSLOCTEXT("CTLTraining", "SetupError", "Training setup is incomplete. Check the director's references."), FText::GetEmpty(), false);
         return;
     }
@@ -99,7 +103,7 @@ void ATrainingDirector::EnterState(ETrainingState NewState)
     const bool Capture = State == ETrainingState::Capture;
     if (DollHighlight) DollHighlight->SetActorHiddenInGame(!Capture);
     if (ContainerHighlight) ContainerHighlight->SetActorHiddenInGame(!Capture);
-    if (BroomHighlight) BroomHighlight->SetActorHiddenInGame(State != ETrainingState::BroomExplanation);
+    if (BroomHighlight) BroomHighlight->SetActorHiddenInGame(true);
     TrainingDoll->bTrainingPickupEnabled = Capture;
     const bool Complete = State >= ETrainingState::Success;
     ObjectivePanel->SetVisibility(State >= ETrainingState::Capture);
@@ -114,8 +118,8 @@ void ATrainingDirector::EnterState(ETrainingState NewState)
         default: break;
     }
     Dialogue->Present(*Line, State == ETrainingState::Finish ? BeginLevelLabel : ContinueLabel,
-        State != ETrainingState::Capture && State != ETrainingState::Traveling);
-    if (Capture) StartDepositCheck();
+        State == ETrainingState::Welcome || State == ETrainingState::Instructions);
+    if (Capture) { if (ExitMission) ExitMission->AcknowledgeIntroduction(); StartDepositCheck(); }
 }
 
 void ATrainingDirector::AdvanceDialogue()
@@ -125,9 +129,7 @@ void ATrainingDirector::AdvanceDialogue()
     {
         case ETrainingState::Welcome: EnterState(ETrainingState::Instructions); break;
         case ETrainingState::Instructions: EnterState(ETrainingState::Capture); break;
-        case ETrainingState::Success: EnterState(ETrainingState::BroomExplanation); break;
-        case ETrainingState::BroomExplanation: EnterState(ETrainingState::Finish); break;
-        case ETrainingState::Finish: BeginAssignment(); break;
+
         default: break;
     }
 }
@@ -159,6 +161,10 @@ void ATrainingDirector::DollStored(ALizardGameplayActor* Lizard, AActor* Contain
     if (State != ETrainingState::Capture || Lizard != TrainingDoll || Container != CaptureContainer || !Lizard->bStored) return;
     GetWorldTimerManager().ClearTimer(DepositTimer);
     EnterState(ETrainingState::Success);
+    // The exit mission owns counting and travel. Keep just its objective visible after storage.
+    DialoguePanel->SetVisibility(false); DialoguePanel->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    ObjectivePanel->SetVisibility(false);
+    PanelInteraction->Suspend();
 }
 void ATrainingDirector::CheckRecovery()
 {
@@ -179,7 +185,8 @@ void ATrainingDirector::BeginAssignment()
     Dialogue->Present(FinishDialogue, BeginLevelLabel, false);
     if (auto* PC = UGameplayStatics::GetPlayerController(this, 0))
         if (PC->PlayerCameraManager) PC->PlayerCameraManager->StartCameraFade(0, 1, .35f, FLinearColor::Black, true, true);
-    GetWorldTimerManager().SetTimer(TravelTimer, this, &ATrainingDirector::LoadAssignment, .4f, false);
+    const float MusicFade = GetGameInstance<UCTLGameInstance>() ? GetGameInstance<UCTLGameInstance>()->PrepareMusicTravel(PendingMap) : 0.f;
+    GetWorldTimerManager().SetTimer(TravelTimer, this, &ATrainingDirector::LoadAssignment, FMath::Max(.4f, MusicFade + .02f), false);
 }
 void ATrainingDirector::LoadAssignment()
 {

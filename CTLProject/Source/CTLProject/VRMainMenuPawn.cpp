@@ -1,6 +1,7 @@
 #include "VRMainMenuPawn.h"
 #include "VRMainMenuWidget.h"
 #include "CTLLevelList.h"
+#include "CTLBackgroundMusic.h"
 #include "Camera/CameraComponent.h"
 #include "MotionControllerComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
@@ -344,8 +345,9 @@ void AVRMainMenuPawn::TravelTo(const TSoftObjectPtr<UWorld>& Destination)
     if (BeginTransition(NSLOCTEXT("CTLMenu", "Loading", "Loading...")))
     {
         PendingMap = Destination;
-        // Let Slate finish routing the click before loading another world.
-        TransitionTimer = GetWorldTimerManager().SetTimerForNextTick(this, &AVRMainMenuPawn::FinishStart);
+        const float FadeTime = GetGameInstance<UCTLGameInstance>() ? GetGameInstance<UCTLGameInstance>()->PrepareMusicTravel(Destination) : 0.f;
+        // Finish Slate routing and, for a new music group, let the outgoing fade finish.
+        GetWorldTimerManager().SetTimer(TransitionTimer, this, &AVRMainMenuPawn::FinishStart, FMath::Max(.02f, FadeTime + .02f), false);
     }
 }
 
@@ -362,7 +364,10 @@ void AVRMainMenuPawn::FinishStart()
 void AVRMainMenuPawn::ExitGame()
 {
     if (BeginTransition(NSLOCTEXT("CTLMenu", "Quitting", "Exiting...")))
-        TransitionTimer = GetWorldTimerManager().SetTimerForNextTick(this, &AVRMainMenuPawn::FinishExit);
+    {
+        const float FadeTime = GetGameInstance<UCTLGameInstance>() ? GetGameInstance<UCTLGameInstance>()->FadeMusicForExit() : 0.f;
+        GetWorldTimerManager().SetTimer(TransitionTimer, this, &AVRMainMenuPawn::FinishExit, FMath::Max(.02f, FadeTime + .02f), false);
+    }
 }
 
 void AVRMainMenuPawn::FinishExit()

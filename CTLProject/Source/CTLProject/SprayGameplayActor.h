@@ -6,6 +6,7 @@
 
 class UInputAction;
 class USceneComponent;
+class UAudioComponent;
 class ASmokePuffGameplayActor;
 struct FInputActionValue;
 
@@ -32,6 +33,7 @@ public:
     UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category="Spray|Runtime") TObjectPtr<ASmokePuffGameplayActor> NewPuff;
     UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category="Spray|Runtime") float LeftTriggerValue = 0.f;
     UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category="Spray|Runtime") float RightTriggerValue = 0.f;
+    UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category="Spray|Audio") TObjectPtr<UAudioComponent> SprayAudio;
 
     UFUNCTION(BlueprintCallable, Category="Spray|Gameplay") void ReadSprayTrigger(bool& Pressed);
     UFUNCTION(BlueprintCallable, Category="Spray|Gameplay") void UpdateEmission(float DeltaSeconds, bool TriggerPressed);
@@ -47,6 +49,8 @@ private:
     void SetRightTrigger(const FInputActionValue& Value);
     void ClearLeftTrigger();
     void ClearRightTrigger();
+    void SetSprayAudioActive(bool Active);
+    bool bSprayAudioActive = false;
     TWeakObjectPtr<USceneComponent> GrabState;
     TWeakObjectPtr<USceneComponent> NozzleComponent;
 };

@@ -18,6 +18,7 @@ UVRPanelInteractor::UVRPanelInteractor()
 }
 void UVRPanelInteractor::Initialize(APawn* Pawn, UUserWidget* Widget, UInputAction* Left, UInputAction* Right, UMaterialInterface* RayMaterial)
 {
+    Target = Widget;
     if (!Pawn || MenuInput) return;
     Player = Cast<APlayerController>(Pawn->GetController());
     if (!Player.IsValid()) return;
@@ -34,6 +35,8 @@ void UVRPanelInteractor::Initialize(APawn* Pawn, UUserWidget* Widget, UInputActi
         WI->TraceChannel = ECC_GameTraceChannel1;
         WI->InteractionDistance = 500.f;
         WI->bShowDebug = false;
+        WI->Activate();
+        WI->SetComponentTickEnabled(true);
         if (!bHMD && Hand == 1) WI->InteractionSource = EWidgetInteractionSource::Mouse;
         auto* Ray = NewObject<UStaticMeshComponent>(GetOwner());
         auto* Dot = NewObject<UStaticMeshComponent>(GetOwner());
@@ -104,6 +107,13 @@ void UVRPanelInteractor::LockForSeconds(float Seconds)
     LockedUntil = GetWorld()->GetTimeSeconds() + Seconds;
     Release(0, true); Release(1, true);
     Armed[0] = Armed[1] = false;
+}
+void UVRPanelInteractor::Suspend()
+{
+    LockForSeconds(1000.f);
+    for (auto* Mesh : {&Rays, &Dots}) for (auto& Part : *Mesh) if (Part) Part->SetVisibility(false);
+    if (Player.IsValid() && MenuInput) Player->PopInputComponent(MenuInput);
+    SetComponentTickEnabled(false);
 }
 void UVRPanelInteractor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {

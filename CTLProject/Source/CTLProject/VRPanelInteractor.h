@@ -22,6 +22,7 @@ public:
     UVRPanelInteractor();
     void Initialize(APawn* Pawn, UUserWidget* Widget, UInputAction* Left, UInputAction* Right, UMaterialInterface* RayMaterial);
     void LockForSeconds(float Seconds);
+    void Suspend();
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 protected:
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;

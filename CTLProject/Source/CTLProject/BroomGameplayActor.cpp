@@ -1,4 +1,5 @@
 #include "BroomGameplayActor.h"
+#include "CTLSoundEffects.h"
 #include "LizardGameplayActor.h"
 #include "ToolBlueprintBridge.h"
 #include "Components/PrimitiveComponent.h"
@@ -64,6 +65,7 @@ void ABroomGameplayActor::ResetSample(USceneComponent* Holder)
     NextContacts.Reset();
     AttemptedThisSample.Reset();
     bSampleValid = Holder != nullptr;
+    bSwingAudioArmed = true;
     PreviousHoldingPawn = Holder ? Holder->GetOwner() : nullptr;
     PreviousPawnTransform = PreviousHoldingPawn.IsValid() ? PreviousHoldingPawn->GetActorTransform() : FTransform::Identity;
 }
@@ -127,6 +129,14 @@ void ABroomGameplayActor::UpdateRake(float DeltaSeconds)
     if (DeltaSeconds < .00001f) return;
     const FVector Current = TipVolume->GetComponentLocation();
     HeadVelocity = (Current - PreviousHeadPosition) / DeltaSeconds;
+    const float Speed = HeadVelocity.Size();
+    if (Speed < FMath::Max(1.f, RakeVelocityThreshold * .5f)) bSwingAudioArmed = true;
+    if (bSwingAudioArmed && Speed >= FMath::Max(1.f, RakeVelocityThreshold))
+    {
+        bSwingAudioArmed = false;
+        if (Speed < 6000.f)
+            if (auto* Audio = UCTLSoundEffectsSubsystem::Get(this)) Audio->PlayEffect(this, ECTLSoundEffect::BroomSwing, Current);
+    }
     NextContacts.Reset();
     AttemptedThisSample.Reset();
     TArray<UPrimitiveComponent*> Overlaps;

@@ -21,18 +21,23 @@ public:
     UPROPERTY(BlueprintReadOnly, Category="Menu", meta=(BindWidgetOptional)) TObjectPtr<UButton> ExitButton;
     UPROPERTY(BlueprintReadOnly, Category="Menu", meta=(BindWidgetOptional)) TObjectPtr<UButton> TutorialButton;
     UPROPERTY(BlueprintReadOnly, Category="Menu", meta=(BindWidgetOptional)) TObjectPtr<UButton> LevelOneButton;
+    UPROPERTY(BlueprintReadOnly, Category="Menu", meta=(BindWidgetOptional)) TObjectPtr<UButton> LevelTwoButton;
     UPROPERTY(BlueprintReadOnly, Category="Menu", meta=(BindWidgetOptional)) TObjectPtr<UButton> BackButton;
     UPROPERTY(BlueprintReadOnly, Category="Menu", meta=(BindWidgetOptional)) TObjectPtr<UTextBlock> TutorialLabel;
     UPROPERTY(BlueprintReadOnly, Category="Menu", meta=(BindWidgetOptional)) TObjectPtr<UTextBlock> LevelOneLabel;
+    UPROPERTY(BlueprintReadOnly, Category="Menu", meta=(BindWidgetOptional)) TObjectPtr<UTextBlock> LevelTwoLabel;
     UPROPERTY(BlueprintReadOnly, Category="Menu", meta=(BindWidgetOptional)) TObjectPtr<UTextBlock> StatusText;
 protected:
     virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;
 private:
     TWeakObjectPtr<AVRMainMenuPawn> MenuPawn;
+    UFUNCTION() void ButtonHovered();
+    bool ConfirmClick();
     UFUNCTION() void StartClicked();
     UFUNCTION() void ExitClicked();
     UFUNCTION() void TutorialClicked();
     UFUNCTION() void LevelOneClicked();
+    UFUNCTION() void LevelTwoClicked();
     UFUNCTION() void BackClicked();
 };

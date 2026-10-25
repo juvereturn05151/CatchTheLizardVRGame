@@ -5,6 +5,7 @@
 class UButton;
 class UTextBlock;
 class ATrainingDirector;
+class AMissionDirector;
 
 UCLASS(Blueprintable)
 class CTLPROJECT_API UTutorialDialogueWidget : public UUserWidget
@@ -12,6 +13,7 @@ class CTLPROJECT_API UTutorialDialogueWidget : public UUserWidget
     GENERATED_BODY()
 public:
     void InitializeDirector(ATrainingDirector* InDirector);
+    void InitializeMission(AMissionDirector* InMission);
     void Present(const FText& Dialogue, const FText& Label, bool bCanContinue);
     UPROPERTY(BlueprintReadOnly, meta=(BindWidget)) TObjectPtr<UTextBlock> DialogueText;
     UPROPERTY(BlueprintReadOnly, meta=(BindWidget)) TObjectPtr<UTextBlock> ActionLabel;
@@ -21,7 +23,9 @@ protected:
     virtual void NativeDestruct() override;
 private:
     TWeakObjectPtr<ATrainingDirector> Director;
+    TWeakObjectPtr<AMissionDirector> Mission;
     UFUNCTION() void ContinueClicked();
+    UFUNCTION() void ContinueHovered();
 };
 
 UCLASS(Blueprintable)

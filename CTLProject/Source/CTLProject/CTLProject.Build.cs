@@ -6,7 +6,7 @@ public class CTLProject : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine", "EnhancedInput", "UMG", "HeadMountedDisplay", "XRBase", "InputCore" });
-        PrivateDependencyModuleNames.AddRange(new[] { "Slate", "SlateCore" });
-        if (Target.bBuildEditor) PrivateDependencyModuleNames.Add("UnrealEd");
+        PrivateDependencyModuleNames.AddRange(new[] { "Slate", "SlateCore", "AudioMixer" });
+        if (Target.bBuildEditor) PrivateDependencyModuleNames.AddRange(new[] { "UnrealEd", "NavigationSystem", "AnimGraph", "BlueprintGraph" });
     }
 }

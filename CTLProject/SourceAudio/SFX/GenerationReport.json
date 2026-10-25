@@ -1,0 +1,50 @@
+{
+  "SFX_UIHover": {
+    "duration_s": 0.065,
+    "peak_dbfs": -15.123865949787206,
+    "rms_dbfs": -20.915149811213606,
+    "loop": false
+  },
+  "SFX_UIConfirm": {
+    "duration_s": 0.12,
+    "peak_dbfs": -11.136728980606405,
+    "rms_dbfs": -20.915149811214032,
+    "loop": false
+  },
+  "SFX_ObjectPickup": {
+    "duration_s": 0.15,
+    "peak_dbfs": -16.787859285501582,
+    "rms_dbfs": -20.91514981125836,
+    "loop": false
+  },
+  "SFX_BroomSwing": {
+    "duration_s": 0.25,
+    "peak_dbfs": -11.056839373155615,
+    "rms_dbfs": -24.500240179490934,
+    "loop": false
+  },
+  "SFX_SprayLoop": {
+    "duration_s": 1.0,
+    "peak_dbfs": -13.257508079207295,
+    "rms_dbfs": -23.741732867142883,
+    "loop": true
+  },
+  "SFX_StunActivated": {
+    "duration_s": 0.48,
+    "peak_dbfs": -17.46107598598832,
+    "rms_dbfs": -20.915149811213606,
+    "loop": false
+  },
+  "SFX_ContainerCapture": {
+    "duration_s": 0.46,
+    "peak_dbfs": -11.056839373155615,
+    "rms_dbfs": -22.540822885407064,
+    "loop": false
+  },
+  "SFX_TutorialComplete": {
+    "duration_s": 0.62,
+    "peak_dbfs": -11.056839373155615,
+    "rms_dbfs": -22.866970854029827,
+    "loop": false
+  }
+}
