@@ -68,7 +68,8 @@ void ATrainingDirector::BeginPlay()
     Dialogue = Cast<UTutorialDialogueWidget>(DialoguePanel->GetUserWidgetObject());
     Objective = Cast<UTutorialObjectiveWidget>(ObjectivePanel->GetUserWidgetObject());
     Mouth = Cast<USphereComponent>(LizardBlueprintBridge::Object(CaptureContainer, TEXT("DepositVolume")));
-    if (!TrainingDoll || !TrainingDoll->bTrainingDoll || !CaptureContainer || !Mouth || !Dialogue || !Objective || !LevelList)
+    if (!IsValid(TrainingDoll) || !TrainingDoll->bTrainingDoll || !IsValid(CaptureContainer) || !IsValid(Mouth)
+        || !IsValid(Dialogue) || !IsValid(Objective) || !IsValid(LevelList) || !IsValid(ExitMission))
     {
         UE_LOG(LogTemp, Error, TEXT("TrainingDirector requires its configured doll, container/DepositVolume, exit mission, UMG widgets and level list."));
         if (Dialogue) Dialogue->Present(NSLOCTEXT("CTLTraining", "SetupError", "Training setup is incomplete. Check the director's references."), FText::GetEmpty(), false);
@@ -174,6 +175,7 @@ void ATrainingDirector::CheckRecovery()
 }
 void ATrainingDirector::BeginAssignment()
 {
+    if (State == ETrainingState::Traveling || !IsValid(Dialogue)) return;
     const FCTLLevelEntry* Entry = LevelList ? LevelList->Find(NextLevelId) : nullptr;
     if (!Entry || Entry->Map.IsNull() || !FPackageName::DoesPackageExist(Entry->Map.ToSoftObjectPath().GetLongPackageName()))
     {

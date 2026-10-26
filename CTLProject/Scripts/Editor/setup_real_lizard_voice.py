@@ -16,6 +16,8 @@ for path,enabled in [('/Game/CatchTheLizard/BP_Lizard',True),
  defaults=B.get_default_object(bp)
  defaults.set_editor_property('bEnableRealLizardVoice',enabled)
  defaults.set_editor_property('LizardVoiceSound',sound if enabled else None)
+ defaults.set_editor_property('LizardVoiceMinInterval',45.)
+ defaults.set_editor_property('LizardVoiceMaxInterval',60.)
  if enabled and not defaults.get_editor_property('LizardVoiceAttenuation'):
   defaults.set_editor_property('LizardVoiceAttenuation',unreal.load_asset('/Game/CatchTheLizard/Audio/SFX/ATT_WorldEffects'))
  B.compile_blueprint(bp,warnings_as_errors=True)

@@ -217,6 +217,7 @@ public:
     // Editor authoring only; runtime builds return false.
     UFUNCTION(BlueprintCallable, Category="Mission|Editor") static bool BuildMissionGeometryAndNavigation();
     UFUNCTION(BlueprintPure, Category="Mission|Teleport") static bool CanTeleportTo(APawn* Pawn, FVector Destination);
+    UFUNCTION(BlueprintCallable, Category="Mission|Teleport") static bool UpdateTeleportPreview(APawn* Pawn, FVector Destination, bool NavigationValid, class UNiagaraParameterCollection* Colors);
 protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;

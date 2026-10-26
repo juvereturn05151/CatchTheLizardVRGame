@@ -345,6 +345,7 @@ void AVRMainMenuPawn::TravelTo(const TSoftObjectPtr<UWorld>& Destination)
     if (BeginTransition(NSLOCTEXT("CTLMenu", "Loading", "Loading...")))
     {
         PendingMap = Destination;
+        UE_LOG(LogTemp, Display, TEXT("CTL menu travel: %s -> %s"), *GetWorld()->GetName(), *Package);
         const float FadeTime = GetGameInstance<UCTLGameInstance>() ? GetGameInstance<UCTLGameInstance>()->PrepareMusicTravel(Destination) : 0.f;
         // Finish Slate routing and, for a new music group, let the outgoing fade finish.
         GetWorldTimerManager().SetTimer(TransitionTimer, this, &AVRMainMenuPawn::FinishStart, FMath::Max(.02f, FadeTime + .02f), false);

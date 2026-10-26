@@ -32,8 +32,8 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Audio") bool bEnableRealLizardVoice = false;
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Audio") TObjectPtr<USoundBase> LizardVoiceSound;
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Audio", meta=(ClampMin="0", ClampMax="1")) float LizardVoiceVolume = .65f;
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Audio", meta=(ClampMin=".1", Units="s")) float LizardVoiceMinInterval = 5.f;
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Audio", meta=(ClampMin=".1", Units="s")) float LizardVoiceMaxInterval = 10.f;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Audio", meta=(ClampMin=".1", Units="s")) float LizardVoiceMinInterval = 45.f;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Lizard|Audio", meta=(ClampMin=".1", Units="s")) float LizardVoiceMaxInterval = 60.f;
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lizard|Audio") TObjectPtr<USoundAttenuation> LizardVoiceAttenuation;
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Lizard|Audio") float NextLizardVoiceTime = -1.f;
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Lizard|Mission") bool bChallengeActive = true;

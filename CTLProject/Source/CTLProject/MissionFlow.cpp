@@ -12,6 +12,7 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Components/WidgetComponent.h"
@@ -27,6 +28,8 @@
 #include "UObject/ConstructorHelpers.h"
 #include "EngineUtils.h"
 #include "Engine/OverlapResult.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraParameterCollection.h"
 #include "Engine/StaticMesh.h"
 #if WITH_EDITOR
 #include "Editor.h"
@@ -118,7 +121,8 @@ AMissionExitDoor::AMissionExitDoor()
     }
     DoorMarkerText = NSLOCTEXT("CTLMission", "HighlightedExit", "EXIT");
     DestinationText = NSLOCTEXT("CTLMission", "ExitDestination", "Exit Here");
-    SetReady(false);
+    // Do not create/update dynamic materials here: cooked Blueprint CDOs can be
+    // constructed on the async loading thread. BeginPlay initializes the visuals.
 }
 
 void AMissionExitDoor::BeginPlay()
@@ -222,7 +226,7 @@ bool AMissionExitDoor::CanCloseTo(float Yaw) const
     return !GetWorld()->OverlapBlockingTestByChannel(LeafPose.GetLocation(), LeafPose.GetRotation(), ECC_Pawn,
         FCollisionShape::MakeBox(Extent.ComponentMax(FVector(1))), Query);
 }
-bool AMissionExitDoor::IsPassable() const { return FMath::Abs(Hinge->GetRelativeRotation().Yaw) >= FMath::Min(PassableAngle, OpenAngle); }
+bool AMissionExitDoor::IsPassable() const { return FMath::Abs(Hinge->GetRelativeRotation().Yaw) >= PassableAngle; }
 bool AMissionExitDoor::ContainsHeadPosition(FVector Position) const
 {
     return FBox(-OutdoorZone->GetUnscaledBoxExtent(), OutdoorZone->GetUnscaledBoxExtent()).IsInsideOrOn(
@@ -230,6 +234,7 @@ bool AMissionExitDoor::ContainsHeadPosition(FVector Position) const
 }
 void AMissionExitDoor::SetReady(bool Ready)
 {
+    if (IsTemplate()) return;
     Ready = Ready && !(IsValid(Mission) && Mission->bComplete);
     if (Ready != bGuidanceActive)
     {
@@ -599,7 +604,14 @@ void AMissionDirector::GoToNextMission() { if (!NextMission.IsNull()) Travel(Nex
 void AMissionDirector::ReturnToMenu() { Travel(MainMenu); }
 void AMissionDirector::Travel(const TSoftObjectPtr<UWorld>& Map)
 {
-    if (!bComplete || bTraveling || Map.IsNull() || !FPackageName::DoesPackageExist(Map.ToSoftObjectPath().GetLongPackageName())) return;
+    if (!bComplete || bTraveling) return;
+    if (Map.IsNull() || !FPackageName::DoesPackageExist(Map.ToSoftObjectPath().GetLongPackageName()) || !IsValid(CompletionWidget))
+    {
+        UE_LOG(LogTemp, Error, TEXT("%s: mission travel unavailable: destination=%s completion widget=%s"),
+            *GetPathName(), *Map.ToSoftObjectPath().GetLongPackageName(), *GetNameSafe(CompletionWidget));
+        return;
+    }
+    UE_LOG(LogTemp, Display, TEXT("CTL mission travel: %s -> %s"), *GetWorld()->GetName(), *Map.ToSoftObjectPath().GetLongPackageName());
     bTraveling = true; PendingMap = Map; CompletionWidget->SetBusy(); Interaction->LockForSeconds(1000.f);
     if (auto* Audio = UCTLSoundEffectsSubsystem::Get(this)) Audio->PlayEffect(this, ECTLSoundEffect::UIConfirm);
     if (auto* PC = UGameplayStatics::GetPlayerController(this, 0))
@@ -645,19 +657,49 @@ bool AMissionDirector::BuildMissionGeometryAndNavigation()
 #endif
 }
 
+bool AMissionDirector::UpdateTeleportPreview(APawn* Pawn, FVector Destination, bool NavigationValid, UNiagaraParameterCollection* Colors)
+{
+    const bool Valid = NavigationValid && CanTeleportTo(Pawn, Destination);
+    if (IsValid(Pawn) && Colors)
+        if (auto* Instance = UNiagaraFunctionLibrary::GetNiagaraParameterCollection(Pawn, Colors))
+            Instance->SetColorParameter(TEXT("TeleportColor"), Valid
+                ? Colors->GetDefaultInstance()->GetColorParameter(TEXT("TeleportColor")) : FLinearColor(1.f, .03f, .02f));
+    return Valid;
+}
+
 bool AMissionDirector::CanTeleportTo(APawn* Pawn, FVector Destination)
 {
-    if (!Pawn) return false;
+    if (!IsValid(Pawn) || !Pawn->GetWorld()) return false;
     const auto* Camera = Pawn->FindComponentByClass<UCameraComponent>();
-    const FVector Start = Camera ? Camera->GetComponentLocation() : Pawn->GetActorLocation();
+    const auto* Capsule = Cast<UCapsuleComponent>(Pawn->GetRootComponent());
+    const FVector Eye = Camera ? Camera->GetComponentLocation() : Pawn->GetActorLocation();
+    const float FloorZ = Pawn->GetActorLocation().Z - (Capsule ? Capsule->GetScaledCapsuleHalfHeight() : 0.f);
+    const FVector Start(Eye.X, Eye.Y, FloorZ); // Room-scale XY; floor-relative destination.
     for (TActorIterator<AMissionExitDoor> It(Pawn->GetWorld()); It; ++It)
     {
-        if (It->IsPassable() && !It->IsLocked()) continue;
-        const FTransform Transform = It->GetActorTransform();
+        const float Radius = FMath::Max(It->PlayerClearanceRadius, Capsule ? Capsule->GetScaledCapsuleRadius() : 0.f);
+        const float Height = FMath::Max(2.f * Radius, Eye.Z - FloorZ);
+        // Test the finite doorway, not an infinite plane. Other routes and floors
+        // remain available, while navmesh projection cannot bypass a shut leaf.
+        const FTransform Transform = It->EntryThreshold->GetComponentTransform();
         const FVector A = Transform.InverseTransformPosition(Start), B = Transform.InverseTransformPosition(Destination);
-        if ((A.X < 0) == (B.X < 0) || FMath::IsNearlyEqual(A.X, B.X)) continue;
-        const float Alpha = -A.X / (B.X - A.X);
-        if (FMath::Abs(FMath::Lerp(A.Y, B.Y, Alpha)) <= 110.f) return false;
+        if ((!It->IsPassable() || It->IsLocked()) && !FMath::IsNearlyEqual(A.X, B.X))
+        {
+            const float Alpha = -A.X / (B.X - A.X);
+            const FVector Crossing = FMath::Lerp(A, B, Alpha);
+            const FVector Extent = It->EntryThreshold->GetUnscaledBoxExtent();
+            const FVector Scale = Transform.GetScale3D().GetAbs().ComponentMax(FVector(.01f));
+            if (Alpha >= 0.f && Alpha <= 1.f && FMath::Abs(Crossing.Y) <= Extent.Y + Radius / Scale.Y
+                && Crossing.Z <= Extent.Z && Crossing.Z + Height / Scale.Z >= -Extent.Z) return false;
+        }
+        // The same query also rejects clipping the visible leaf during its swing
+        // or landing inside it, even after the opening-angle threshold is reached.
+        FHitResult Hit;
+        const FVector Offset(0, 0, Height * .5f);
+        const FCollisionShape Clearance = FCollisionShape::MakeCapsule(Radius, Height * .5f);
+        if (It->DoorMesh->OverlapComponent(Destination + Offset, FQuat::Identity, Clearance)) return false;
+        if (It->DoorMesh->SweepComponent(Hit, Start + Offset, Destination + Offset, FQuat::Identity,
+            Clearance) && !Hit.bStartPenetrating) return false;
     }
     return true;
 }

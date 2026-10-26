@@ -14,6 +14,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/Pawn.h"
@@ -27,7 +28,7 @@ using namespace LizardBlueprintBridge;
 
 namespace
 {
-    template<typename T> T* NamedComponent(AActor* Actor, FName Name)
+    template<typename T> T* FindLizardComponent(AActor* Actor, FName Name)
     {
         if (!IsValid(Actor)) return nullptr;
         TArray<T*> Components;
@@ -61,19 +62,19 @@ void ALizardGameplayActor::OnConstruction(const FTransform& Transform)
 }
 void ALizardGameplayActor::ConfigureAnimatedVisual()
 {
-    AnimatedBodyMesh = NamedComponent<USkeletalMeshComponent>(this, TEXT("LizardAnimatedBody"));
+    AnimatedBodyMesh = FindLizardComponent<USkeletalMeshComponent>(this, TEXT("LizardAnimatedBody"));
     if (!AnimatedBodyMesh.IsValid() || !AnimatedSkeletalMesh) return;
     AnimatedBodyMesh->SetSkeletalMeshAsset(AnimatedSkeletalMesh);
     AnimatedBodyMesh->SetAnimInstanceClass(AnimationBlueprintClass);
     AnimatedBodyMesh->SetRelativeLocationAndRotation(AnimatedMeshContactOffset, AnimatedMeshRotation);
     AnimatedBodyMesh->SetRelativeScale3D(AnimatedMeshScale);
     AnimatedBodyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    if (auto* LegacyBody = NamedComponent<UStaticMeshComponent>(this, TEXT("LizardBody"))) LegacyBody->SetVisibility(false);
+    if (auto* LegacyBody = FindLizardComponent<UStaticMeshComponent>(this, TEXT("LizardBody"))) LegacyBody->SetVisibility(false);
 }
 
 void ALizardGameplayActor::ResolveInteractionComponents()
 {
-    BodyMesh = NamedComponent<UStaticMeshComponent>(this, TEXT("LizardBody"));
+    BodyMesh = FindLizardComponent<UStaticMeshComponent>(this, TEXT("LizardBody"));
     ConfigureAnimatedVisual();
     if (AnimatedBodyMesh.IsValid()) {
         AnimatedBodyMesh->SetRelativeLocationAndRotation(AnimatedMeshContactOffset, AnimatedMeshRotation);
@@ -82,9 +83,9 @@ void ALizardGameplayActor::ResolveInteractionComponents()
         AnimatedBodyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         if (BodyMesh.IsValid()) BodyMesh->SetVisibility(false);
     }
-    CatchVolume = NamedComponent<UPrimitiveComponent>(this, TEXT("CatchSphere"));
-    StunHalo = NamedComponent<USceneComponent>(this, TEXT("SmokeStunHalo"));
-    SprayStatusWidget = NamedComponent<UWidgetComponent>(this, TEXT("SprayStatusWidget"));
+    CatchVolume = FindLizardComponent<UPrimitiveComponent>(this, TEXT("CatchSphere"));
+    StunHalo = FindLizardComponent<USceneComponent>(this, TEXT("SmokeStunHalo"));
+    SprayStatusWidget = FindLizardComponent<UWidgetComponent>(this, TEXT("SprayStatusWidget"));
     APawn* Pawn = UGameplayStatics::GetPlayerPawn(this, 0);
     LeftHand = Cast<USceneComponent>(Object(Pawn, TEXT("MotionControllerLeftGrip")));
     RightHand = Cast<USceneComponent>(Object(Pawn, TEXT("MotionControllerRightGrip")));
@@ -419,8 +420,6 @@ void ALizardGameplayActor::TryStoreInBottle(AActor* Bottle, bool& Accepted)
 {
     Accepted = false;
     if (!Caught || bStored || !IsValid(Bottle) || !GetRootComponent() || !CatchVolume.IsValid()) return;
-    UObject* Grab = Object(Bottle, TEXT("GrabComponent"));
-    USceneComponent* BottleHand = Cast<USceneComponent>(Object(Grab, TEXT("MotionControllerRef")));
     USceneComponent* CatchHand = GetRootComponent()->GetAttachParent();
     UPrimitiveComponent* Mouth = Cast<UPrimitiveComponent>(Object(Bottle, TEXT("DepositVolume")));
     if ((CatchHand != LeftHand && CatchHand != RightHand) || !IsValid(CatchHand)
@@ -433,12 +432,35 @@ void ALizardGameplayActor::TryStoreInBottle(AActor* Bottle, bool& Accepted)
         if (Bottle != TrainingContainer || !Sphere || FVector::DistSquared(CatchVolume->GetComponentLocation(), Sphere->GetComponentLocation())
             > FMath::Square(Sphere->GetScaledSphereRadius() * .7f)) return;
     }
-    else if (!Bool(Grab, TEXT("bIsHeld")) || !IsValid(BottleHand) || CatchHand == BottleHand) return;
+    else
+    {
+        // Overlap alone includes the sphere's exterior fringe. The lizard's capture
+        // center must enter the authored interior, regardless of who holds the jar.
+        const FVector Center = CatchVolume->GetComponentLocation();
+        if (const auto* Sphere = Cast<USphereComponent>(Mouth))
+        {
+            if (FVector::DistSquared(Center, Sphere->GetComponentLocation()) > FMath::Square(Sphere->GetScaledSphereRadius())) return;
+        }
+        else if (const auto* Box = Cast<UBoxComponent>(Mouth))
+        {
+            const FVector Extent = Box->GetUnscaledBoxExtent();
+            if (!FBox(-Extent, Extent).IsInsideOrOn(Box->GetComponentTransform().InverseTransformPosition(Center))) return;
+        }
+        else
+        {
+            FVector Closest;
+            const float Distance = Mouth->GetClosestPointOnCollision(Center, Closest);
+            if (Distance < 0.f || Distance > KINDA_SMALL_NUMBER) return;
+        }
+    }
     bStored = true; // Set terminal state before any detach, overlap, or timer callbacks can run.
     StopLizardVoice();
     CancelSmokeState();
     bDropped = bSmokeStunned = bWasRaked = Fleeing = false;
     ForceFleeUntil = 0.f;
+    // Native lizard grabbing is represented by this hand attachment, not the
+    // tool HeldComponent slots. Detaching clears IsToolHandOccupied immediately;
+    // do not clear a slot belonging to a held container or another tool.
     DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
     SetActorEnableCollision(false);
     SetActorHiddenInGame(true);
